@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Car Rental Service - Home</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <a href="/"><i class="fas fa-car"></i> CarRental</a>
+        </div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="/cars" class="nav-link">Cars</a>
+          </li>
+          <li class="nav-item" id="bookings-link" style="display: none">
+            <a href="/bookings" class="nav-link">My Bookings</a>
+          </li>
+          <li class="nav-item" id="admin-link" style="display: none">
+            <a href="/admin" class="nav-link">Admin</a>
+          </li>
+          <li class="nav-item" id="login-link">
+            <a href="/login" class="nav-link">Login</a>
+          </li>
+          <li class="nav-item" id="signup-link">
+            <a href="/signup" class="nav-link">Sign Up</a>
+          </li>
+          <li class="nav-item" id="logout-link" style="display: none">
+            <a href="#" class="nav-link" onclick="logout()">Logout</a>
+          </li>
+        </ul>
+        <div class="hamburger">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="hero-section">
+        <div class="hero-content">
+          <h1>Welcome to Car Rental Service</h1>
+          <p>Find and book the perfect car for your next adventure</p>
+          <div class="hero-buttons">
+            <a href="/cars" class="btn btn-primary">Browse Cars</a>
+            <a href="/signup" class="btn btn-secondary" id="hero-signup"
+              >Get Started</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="features-section">
+        <div class="container">
+          <h2>Why Choose Us?</h2>
+          <div class="features-grid">
+            <div class="feature-card">
+              <i class="fas fa-car"></i>
+              <h3>Wide Selection</h3>
+              <p>Choose from a variety of cars to suit your needs</p>
+            </div>
+            <div class="feature-card">
+              <i class="fas fa-clock"></i>
+              <h3>24/7 Service</h3>
+              <p>Book anytime, anywhere with our easy online system</p>
+            </div>
+            <div class="feature-card">
+              <i class="fas fa-shield-alt"></i>
+              <h3>Secure Booking</h3>
+              <p>Your bookings are safe and secure with us</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-container">
+        <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Rental Service - My Bookings</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="/"><i class="fas fa-car"></i> CarRental</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/cars" class="nav-link">Cars</a>
+                </li>
+                <li class="nav-item" id="bookings-link" style="display: none;">
+                    <a href="/bookings" class="nav-link">My Bookings</a>
+                </li>
+                <li class="nav-item" id="admin-link" style="display: none;">
+                    <a href="/admin" class="nav-link">Admin</a>
+                </li>
+                <li class="nav-item" id="login-link">
+                    <a href="/login" class="nav-link">Login</a>
+                </li>
+                <li class="nav-item" id="signup-link">
+                    <a href="/signup" class="nav-link">Sign Up</a>
+                </li>
+                <li class="nav-item" id="logout-link" style="display: none;">
+                    <a href="#" class="nav-link" onclick="logout()">Logout</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="container">
+            <div class="page-header">
+                <h1>My Bookings</h1>
+                <p>Manage your car rental bookings</p>
+            </div>
+            
+            <div id="bookingsContainer">
+                <!-- Bookings will be loaded here -->
+            </div>
+            
+            <div id="loading" class="loading">Loading bookings...</div>
+        </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (!isLoggedIn()) {
+        window.location.href = '/login';
+        return;
+    }
+    loadBookings();
+});
+
+async function loadBookings() {
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch('/api/bookings/my-bookings', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        const bookings = await response.json();
+        displayBookings(bookings);
+        document.getElementById('loading').style.display = 'none';
+    } catch (error) {
+        document.getElementById('loading').innerHTML = 'Error loading bookings';
+    }
+}
+
+function displayBookings(bookings) {
+    const container = document.getElementById('bookingsContainer');
+    
+    if (bookings.length === 0) {
+        container.innerHTML = '<div class="no-bookings">You have no bookings yet</div>';
+        return;
+    }
+    
+    container.innerHTML = bookings.map(booking => `
+        <div class="booking-card">
+            <div class="booking-info">
+                <h3>${booking.carId?.model || 'Unknown Car'}</h3>
+                <p><strong>Type:</strong> ${booking.carId?.type || 'N/A'}</p>
+                <p><strong>Start Date:</strong> ${new Date(booking.startDate).toLocaleDateString()}</p>
+                <p><strong>End Date:</strong> ${new Date(booking.endDate).toLocaleDateString()}</p>
+                <p><strong>Status:</strong> <span class="status-${booking.status}">${booking.status}</span></p>
+            </div>
+            <div class="booking-actions">
+                ${booking.status === 'booked' ? 
+                    `<button class="btn btn-danger" onclick="cancelBooking('${booking._id}')">Cancel Booking</button>` :
+                    ''
+                }
+            </div>
+        </div>
+    `).join('');
+}
+
+async function cancelBooking(bookingId) {
+    if (!confirm('Are you sure you want to cancel this booking?')) {
+        return;
+    }
+    
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch(`/api/bookings/cancel/${bookingId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            alert('Booking cancelled successfully');
+            loadBookings(); // Reload bookings
+        } else {
+            alert('Failed to cancel booking');
+        }
+    } catch (error) {
+        alert('Error cancelling booking');
+    }
+}
+</script>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Car Rental Service - Login</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <a href="/"><i class="fas fa-car"></i> CarRental</a>
+        </div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="/cars" class="nav-link">Cars</a>
+          </li>
+          <li class="nav-item" id="bookings-link" style="display: none">
+            <a href="/bookings" class="nav-link">My Bookings</a>
+          </li>
+          <li class="nav-item" id="admin-link" style="display: none">
+            <a href="/admin" class="nav-link">Admin</a>
+          </li>
+          <li class="nav-item" id="login-link">
+            <a href="/login" class="nav-link">Login</a>
+          </li>
+          <li class="nav-item" id="signup-link">
+            <a href="/signup" class="nav-link">Sign Up</a>
+          </li>
+          <li class="nav-item" id="logout-link" style="display: none">
+            <a href="#" class="nav-link" onclick="logout()">Logout</a>
+          </li>
+        </ul>
+        <div class="hamburger">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="auth-container">
+        <div class="auth-form">
+          <h2>Login to Your Account</h2>
+          <div id="message" class="message"></div>
+          <form id="loginForm">
+            <div class="form-group">
+              <label for="email">Email:</label>
+              <input type="email" id="email" name="email" required />
+            </div>
+            <div class="form-group">
+              <label for="password">Password:</label>
+              <input type="password" id="password" name="password" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+          </form>
+          <p class="auth-link">
+            Don't have an account? <a href="/signup">Sign up here</a>
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-container">
+        <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          const messageDiv = document.getElementById("message");
+
+          try {
+            const response = await fetch("/auth/login", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              localStorage.setItem("token", data.token);
+              localStorage.setItem("user", JSON.stringify(data.user));
+              messageDiv.innerHTML =
+                '<div class="success">Login successful! Redirecting...</div>';
+              setTimeout(() => {
+                window.location.href = "/";
+              }, 1000);
+            } else {
+              messageDiv.innerHTML = `<div class="error">${
+                data.message || "Login failed"
+              }</div>`;
+            }
+          } catch (error) {
+            messageDiv.innerHTML =
+              '<div class="error">Network error. Please try again.</div>';
+          }
+        });
+    </script>
+  </body>
+</html>
