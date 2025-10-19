@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Car Rental Service - Cars</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <a href="/"><i class="fas fa-car"></i> CarRental</a>
+        </div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="/cars" class="nav-link">Cars</a>
+          </li>
+          <li class="nav-item" id="bookings-link" style="display: none">
+            <a href="/bookings" class="nav-link">My Bookings</a>
+          </li>
+          <li class="nav-item" id="admin-link" style="display: none">
+            <a href="/admin" class="nav-link">Admin</a>
+          </li>
+          <li class="nav-item" id="login-link">
+            <a href="/login" class="nav-link">Login</a>
+          </li>
+          <li class="nav-item" id="signup-link">
+            <a href="/signup" class="nav-link">Sign Up</a>
+          </li>
+          <li class="nav-item" id="logout-link" style="display: none">
+            <a href="#" class="nav-link" onclick="logout()">Logout</a>
+          </li>
+        </ul>
+        <div class="hamburger">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="container">
+        <div class="page-header">
+          <h1>Available Cars</h1>
+          <p>Choose from our wide selection of vehicles</p>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-controls">
+            <select id="typeFilter">
+              <option value="">All Types</option>
+              <option value="sedan">Sedan</option>
+              <option value="suv">SUV</option>
+              <option value="hatchback">Hatchback</option>
+              <option value="luxury">Luxury</option>
+            </select>
+            <button class="btn btn-secondary" onclick="filterCars()">
+              Filter by Type
+            </button>
+          </div>
+        </div>
+
+        <div id="carsContainer" class="cars-grid">
+          <!-- Cars will be loaded here -->
+        </div>
+
+        <div id="loading" class="loading">Loading cars...</div>
+      </div>
+
+      <!-- Booking Modal -->
+      <div id="bookingModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2>Book This Car</h2>
+          <div id="bookingMessage" class="message"></div>
+          <form id="bookingForm">
+            <input type="hidden" id="carId" name="carId" />
+            <div class="form-group">
+              <label for="startDate">Start Date:</label>
+              <input type="date" id="startDate" name="startDate" required />
+            </div>
+            <div class="form-group">
+              <label for="endDate">End Date:</label>
+              <input type="date" id="endDate" name="endDate" required />
+            </div>
+            <div class="form-group">
+              <label>Total Cost:</label>
+              <div id="totalCost">$0</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Book Now</button>
+          </form>
+        </div>
+      </div>
+
+      <script>
+        let allCars = [];
+        let currentStartDate = "";
+        let currentEndDate = "";
+
+        // Load cars on page load
+        document.addEventListener("DOMContentLoaded", function () {
+          loadCars();
+
+          // Set minimum date for date inputs to today
+          const today = new Date().toISOString().split("T")[0];
+          document.getElementById("filterStartDate").min = today;
+          document.getElementById("filterEndDate").min = today;
+
+          // Update end date minimum when start date changes
+          document
+            .getElementById("filterStartDate")
+            .addEventListener("change", function () {
+              const startDate = this.value;
+              if (startDate) {
+                document.getElementById("filterEndDate").min = startDate;
+              }
+            });
+        });
+
+        async function loadCars(startDate = "", endDate = "") {
+          try {
+            let url = "/api/cars";
+            if (startDate && endDate) {
+              url += `?startDate=${startDate}&endDate=${endDate}`;
+              currentStartDate = startDate;
+              currentEndDate = endDate;
+            }
+
+            const response = await fetch(url);
+            allCars = await response.json();
+            displayCars(allCars);
+            document.getElementById("loading").style.display = "none";
+          } catch (error) {
+            document.getElementById("loading").innerHTML = "Error loading cars";
+          }
+        }
+
+        async function checkAvailability() {
+          const startDate = document.getElementById("filterStartDate").value;
+          const endDate = document.getElementById("filterEndDate").value;
+
+          if (!startDate || !endDate) {
+            alert("Please select both start and end dates");
+            return;
+          }
+
+          if (new Date(startDate) >= new Date(endDate)) {
+            alert("End date must be after start date");
+            return;
+          }
+
+          document.getElementById("loading").style.display = "block";
+          await loadCars(startDate, endDate);
+
+          // Update the booking modal with selected dates
+          document.getElementById("startDate").value = startDate;
+          document.getElementById("endDate").value = endDate;
+        }
+
+        function displayCars(cars) {
+          const container = document.getElementById("carsContainer");
+
+          if (cars.length === 0) {
+            container.innerHTML =
+              '<div class="no-cars">No cars available</div>';
+            return;
+          }
+
+          container.innerHTML = cars
+            .map(
+              (car) => `
+        <div class="car-card">
+            ${
+              car.imageUrl
+                ? `<div class="car-image">
+                <img src="${car.imageUrl}" alt="${car.model}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
+            </div>`
+                : ""
+            }
+            <div class="car-info">
+                <h3>${car.model}</h3>
+                <p class="car-type">${car.type}</p>
+                <p class="car-price">$${car.pricePerDay}/day</p>
+                <p class="car-status ${
+                  car.availability ? "available" : "unavailable"
+                }">
+                    ${car.availability ? "Available" : "Not Available"}
+                </p>
+                ${
+                  currentStartDate && currentEndDate && car.availability
+                    ? `<p class="availability-info">Available for ${formatDate(
+                        currentStartDate
+                      )} - ${formatDate(currentEndDate)}</p>`
+                    : ""
+                }
+            </div>
+            <div class="car-actions">
+                ${
+                  car.availability
+                    ? `<button class="btn btn-primary" onclick="openBookingModal('${car._id}', '${car.model}', ${car.pricePerDay})">Book Now</button>`
+                    : `<button class="btn btn-disabled" disabled>Not Available</button>`
+                }
+            </div>
+        </div>
+    `
+            )
+            .join("");
+        }
+
+        function formatDate(dateString) {
+          return new Date(dateString).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        }
+
+        function filterCars() {
+          const typeFilter = document.getElementById("typeFilter").value;
+
+          let filteredCars = allCars;
+
+          if (typeFilter) {
+            filteredCars = allCars.filter(
+              (car) => car.type.toLowerCase() === typeFilter.toLowerCase()
+            );
+          }
+
+          displayCars(filteredCars);
+        }
+
+        function openBookingModal(carId, carModel, pricePerDay) {
+          if (!isLoggedIn()) {
+            alert("Please login to book a car");
+            window.location.href = "/login";
+            return;
+          }
+
+          document.getElementById("carId").value = carId;
+          document.getElementById("bookingModal").style.display = "block";
+
+          // Pre-fill dates if they were selected for availability check
+          if (currentStartDate && currentEndDate) {
+            document.getElementById("startDate").value = currentStartDate;
+            document.getElementById("endDate").value = currentEndDate;
+            calculateCost();
+          }
+
+          // Calculate total cost when dates change
+          const startDate = document.getElementById("startDate");
+          const endDate = document.getElementById("endDate");
+
+          function calculateCost() {
+            if (startDate.value && endDate.value) {
+              const start = new Date(startDate.value);
+              const end = new Date(endDate.value);
+              const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+              if (days > 0) {
+                const total = days * pricePerDay;
+                document.getElementById("totalCost").textContent = `$${total}`;
+              }
+            }
+          }
+
+          startDate.addEventListener("change", calculateCost);
+          endDate.addEventListener("change", calculateCost);
+        }
+
+        // Close modal
+        document.querySelector(".close").onclick = function () {
+          document.getElementById("bookingModal").style.display = "none";
+        };
+
+        window.onclick = function (event) {
+          const modal = document.getElementById("bookingModal");
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        };
+
+        // Handle booking form submission
+        document
+          .getElementById("bookingForm")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const token = localStorage.getItem("token");
+            if (!token) {
+              alert("Please login first");
+              return;
+            }
+
+            const formData = new FormData(e.target);
+            const bookingData = {
+              carId: formData.get("carId"),
+              startDate: formData.get("startDate"),
+              endDate: formData.get("endDate"),
+            };
+
+            const messageDiv = document.getElementById("bookingMessage");
+
+            try {
+              const response = await fetch("/api/bookings", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(bookingData),
+              });
+
+              const data = await response.json();
+
+              if (response.ok) {
+                messageDiv.innerHTML =
+                  '<div class="success">Booking successful!</div>';
+                setTimeout(() => {
+                  document.getElementById("bookingModal").style.display =
+                    "none";
+                  loadCars(currentStartDate, currentEndDate); // Reload cars with current date filter to update availability
+                }, 2000);
+              } else {
+                messageDiv.innerHTML = `<div class="error">${
+                  data.message || "Booking failed"
+                }</div>`;
+              }
+            } catch (error) {
+              messageDiv.innerHTML =
+                '<div class="error">Network error. Please try again.</div>';
+            }
+          });
+      </script>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-container">
+        <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

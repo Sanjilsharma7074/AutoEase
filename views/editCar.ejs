@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Car Rental Service - Edit Car</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .edit-car-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+      }
+
+      .image-preview {
+        max-width: 300px;
+        max-height: 200px;
+        margin-top: 1rem;
+        border-radius: 5px;
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+      }
+
+      .message {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        border-radius: 5px;
+      }
+
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <a href="/"><i class="fas fa-car"></i> CarRental</a>
+        </div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="/cars" class="nav-link">Cars</a>
+          </li>
+          <li class="nav-item">
+            <a href="/admin" class="nav-link">Admin</a>
+          </li>
+          <li class="nav-item" id="logout-link" style="display: none">
+            <a href="#" class="nav-link" onclick="logout()">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main>
+      <div class="container">
+        <div class="edit-car-container">
+          <div class="page-header">
+            <h1>Edit Car</h1>
+            <p>Update car information and image</p>
+          </div>
+
+          <div id="message" class="message" style="display: none"></div>
+
+          <form id="editCarForm">
+            <input type="hidden" id="carId" />
+
+            <div class="form-group">
+              <label for="model">Car Model:</label>
+              <input type="text" id="model" name="model" required />
+            </div>
+
+            <div class="form-group">
+              <label for="type">Car Type:</label>
+              <select id="type" name="type" required>
+                <option value="">Select Type</option>
+                <option value="sedan">Sedan</option>
+                <option value="suv">SUV</option>
+                <option value="hatchback">Hatchback</option>
+                <option value="luxury">Luxury</option>
+                <option value="coupe">Coupe</option>
+                <option value="convertible">Convertible</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="pricePerDay">Price Per Day ($):</label>
+              <input
+                type="number"
+                id="pricePerDay"
+                name="pricePerDay"
+                min="1"
+                step="0.01"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="imageUrl">Car Image URL:</label>
+              <input
+                type="url"
+                id="imageUrl"
+                name="imageUrl"
+                placeholder="Enter image URL or select from suggestions below"
+              />
+              <img
+                id="imagePreview"
+                class="image-preview"
+                style="display: none"
+                alt="Car preview"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Sample Car Images (Click to use):</label>
+              <div
+                class="image-suggestions"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                  gap: 10px;
+                  margin-top: 10px;
+                "
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1549924231-f129b911e442?w=300&h=200&fit=crop"
+                  alt="Luxury Sedan"
+                  class="suggestion-img"
+                  onclick="selectImage(this.src)"
+                  style="
+                    cursor: pointer;
+                    border-radius: 5px;
+                    width: 100%;
+                    height: 120px;
+                    object-fit: cover;
+                  "
+                />
+                <img
+                  src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=300&h=200&fit=crop"
+                  alt="SUV"
+                  class="suggestion-img"
+                  onclick="selectImage(this.src)"
+                  style="
+                    cursor: pointer;
+                    border-radius: 5px;
+                    width: 100%;
+                    height: 120px;
+                    object-fit: cover;
+                  "
+                />
+                <img
+                  src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=300&h=200&fit=crop"
+                  alt="Hatchback"
+                  class="suggestion-img"
+                  onclick="selectImage(this.src)"
+                  style="
+                    cursor: pointer;
+                    border-radius: 5px;
+                    width: 100%;
+                    height: 120px;
+                    object-fit: cover;
+                  "
+                />
+                <img
+                  src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=300&h=200&fit=crop"
+                  alt="Sports Car"
+                  class="suggestion-img"
+                  onclick="selectImage(this.src)"
+                  style="
+                    cursor: pointer;
+                    border-radius: 5px;
+                    width: 100%;
+                    height: 120px;
+                    object-fit: cover;
+                  "
+                />
+                <img
+                  src="https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?w=300&h=200&fit=crop"
+                  alt="Electric Car"
+                  class="suggestion-img"
+                  onclick="selectImage(this.src)"
+                  style="
+                    cursor: pointer;
+                    border-radius: 5px;
+                    width: 100%;
+                    height: 120px;
+                    object-fit: cover;
+                  "
+                />
+                <img
+                  src="https://images.unsplash.com/photo-1570829460005-c840387bb1ca?w=300&h=200&fit=crop"
+                  alt="Convertible"
+                  class="suggestion-img"
+                  onclick="selectImage(this.src)"
+                  style="
+                    cursor: pointer;
+                    border-radius: 5px;
+                    width: 100%;
+                    height: 120px;
+                    object-fit: cover;
+                  "
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="availability" name="availability" />
+                Available for booking
+              </label>
+            </div>
+
+            <div class="btn-group">
+              <button type="submit" class="btn btn-primary">Update Car</button>
+              <a href="/admin" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Check if user is admin
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        if (!user || user.role !== "admin") {
+          alert("Access denied. Admin only.");
+          window.location.href = "/";
+          return;
+        }
+
+        // Load car data from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const carId = urlParams.get("id");
+
+        if (carId) {
+          loadCarData(carId);
+        } else {
+          alert("No car ID specified");
+          window.location.href = "/admin";
+        }
+      });
+
+      async function loadCarData(carId) {
+        try {
+          const response = await fetch("/api/cars");
+          const cars = await response.json();
+          const car = cars.find((c) => c._id === carId);
+
+          if (car) {
+            document.getElementById("carId").value = car._id;
+            document.getElementById("model").value = car.model;
+            document.getElementById("type").value = car.type;
+            document.getElementById("pricePerDay").value = car.pricePerDay;
+            document.getElementById("imageUrl").value = car.imageUrl || "";
+            document.getElementById("availability").checked = car.availability;
+
+            if (car.imageUrl) {
+              const preview = document.getElementById("imagePreview");
+              preview.src = car.imageUrl;
+              preview.style.display = "block";
+            }
+          } else {
+            alert("Car not found");
+            window.location.href = "/admin";
+          }
+        } catch (error) {
+          console.error("Error loading car data:", error);
+          showMessage("Error loading car data", "error");
+        }
+      }
+
+      function selectImage(imageUrl) {
+        document.getElementById("imageUrl").value = imageUrl;
+        const preview = document.getElementById("imagePreview");
+        preview.src = imageUrl;
+        preview.style.display = "block";
+      }
+
+      // Preview image when URL is entered
+      document.getElementById("imageUrl").addEventListener("input", (e) => {
+        const preview = document.getElementById("imagePreview");
+        if (e.target.value) {
+          preview.src = e.target.value;
+          preview.style.display = "block";
+        } else {
+          preview.style.display = "none";
+        }
+      });
+
+      // Handle form submission
+      document
+        .getElementById("editCarForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const token = localStorage.getItem("token");
+          const carId = document.getElementById("carId").value;
+
+          const formData = {
+            model: document.getElementById("model").value,
+            type: document.getElementById("type").value,
+            pricePerDay: parseFloat(
+              document.getElementById("pricePerDay").value
+            ),
+            imageUrl: document.getElementById("imageUrl").value,
+            availability: document.getElementById("availability").checked,
+          };
+
+          try {
+            const response = await fetch(`/api/cars/${carId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              showMessage("Car updated successfully!", "success");
+              setTimeout(() => {
+                window.location.href = "/admin";
+              }, 2000);
+            } else {
+              showMessage(result.message || "Failed to update car", "error");
+            }
+          } catch (error) {
+            console.error("Error updating car:", error);
+            showMessage("Network error. Please try again.", "error");
+          }
+        });
+
+      function showMessage(text, type) {
+        const messageDiv = document.getElementById("message");
+        messageDiv.textContent = text;
+        messageDiv.className = `message ${type}`;
+        messageDiv.style.display = "block";
+      }
+    </script>
+
+    <script src="/js/auth.js"></script>
+  </body>
+</html>
