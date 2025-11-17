@@ -35,6 +35,28 @@ mongoose
   .catch((err) => console.log(err));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const http = require("http");
+const { Server } = require("socket.io");
+
+// Create HTTP server and attach Socket.IO
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+// Make io available in routes via app.locals
+app.locals.io = io;
+
+io.on("connection", (socket) => {
+  console.log("New WebSocket client connected: ", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("WebSocket client disconnected: ", socket.id);
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`Server running on PORT : ${PORT}`);
 });

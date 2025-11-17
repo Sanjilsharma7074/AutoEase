@@ -55,96 +55,39 @@ function validateDates(startDate, endDate) {
     return { valid: false, message: "End date must be after start date" };
   }
 
-  return { valid: true };
-}
-
-// Show/hide elements based on loading state
-function showLoading(element) {
-  if (element) {
-    element.innerHTML = '<div class="loading">Loading...</div>';
   }
-}
 
-function hideLoading(element) {
-  if (element) {
-    const loading = element.querySelector(".loading");
-    if (loading) {
-      loading.remove();
-    }
-  }
-}
+  document.addEventListener("DOMContentLoaded", function () {
+    // Add click handlers for cards with hover effects
+    const cards = document.querySelectorAll(
+      ".car-card, .booking-card, .feature-card"
+    );
+    cards.forEach((card) => {
+      card.addEventListener("mouseenter", function () {
+        this.style.transform = "translateY(-5px)";
+      });
 
-// Generic error handler
-function handleError(error, messageElement) {
-  console.error("Error:", error);
-  if (messageElement) {
-    messageElement.innerHTML =
-      '<div class="error">An error occurred. Please try again.</div>';
-  }
-}
-
-// Format currency
-function formatCurrency(amount) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-}
-
-// Format date
-function formatDate(date) {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-// Debounce function for search inputs
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
-
-// Initialize tooltips and other UI enhancements
-document.addEventListener("DOMContentLoaded", function () {
-  // Add click handlers for cards with hover effects
-  const cards = document.querySelectorAll(
-    ".car-card, .booking-card, .feature-card"
-  );
-  cards.forEach((card) => {
-    card.addEventListener("mouseenter", function () {
-      this.style.transform = "translateY(-5px)";
+      card.addEventListener("mouseleave", function () {
+        this.style.transform = "translateY(0)";
+      });
     });
 
-    card.addEventListener("mouseleave", function () {
-      this.style.transform = "translateY(0)";
+    // Auto-hide alerts after 5 seconds
+    const alerts = document.querySelectorAll(".success, .error");
+    alerts.forEach((alert) => {
+      setTimeout(() => {
+        alert.style.opacity = "0";
+        setTimeout(() => alert.remove(), 300);
+      }, 5000);
+    });
+
+    // Set minimum date for date inputs to today
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    const today = new Date().toISOString().split("T")[0];
+    dateInputs.forEach((input) => {
+      input.min = today;
     });
   });
-
-  // Auto-hide alerts after 5 seconds
-  const alerts = document.querySelectorAll(".success, .error");
-  alerts.forEach((alert) => {
-    setTimeout(() => {
-      alert.style.opacity = "0";
-      setTimeout(() => alert.remove(), 300);
-    }, 5000);
-  });
-
-  // Set minimum date for date inputs to today
-  const dateInputs = document.querySelectorAll('input[type="date"]');
-  const today = new Date().toISOString().split("T")[0];
-  dateInputs.forEach((input) => {
-    input.min = today;
-  });
-});
 
 // Utility function to make API calls with authentication
 async function apiCall(url, options = {}) {
@@ -183,3 +126,61 @@ async function apiCall(url, options = {}) {
     throw error;
   }
 }
+
+// Setup WebSocket connection (Socket.IO)
+;(function () {
+  // Guard against pages where the Socket.IO client script wasn't included
+  if (typeof io === "undefined") {
+    console.warn("Socket.IO client not available: 'io' is undefined");
+    return;
+  }
+
+  try {
+    const socket = io();
+
+    socket.on("connect", () => {
+      console.log("Connected to WebSocket server", socket.id);
+    });
+
+    socket.on("booking:created", (booking) => {
+      console.log("New booking received via socket:", booking);
+      // Basic user-visible notification — customize as needed
+      if (document) {
+        const banner = document.createElement("div");
+        banner.className = "socket-notice";
+        banner.textContent = `New booking made for car ${booking.carId} (ID: ${booking._id})`;
+        banner.style.position = "fixed";
+        banner.style.right = "20px";
+        banner.style.bottom = "20px";
+        banner.style.background = "#2b8a3e";
+        banner.style.color = "#fff";
+        banner.style.padding = "10px 14px";
+        banner.style.borderRadius = "6px";
+        banner.style.zIndex = 10000;
+        document.body.appendChild(banner);
+        setTimeout(() => banner.remove(), 5000);
+      }
+    });
+
+    socket.on("booking:cancelled", (booking) => {
+      console.log("Booking cancelled via socket:", booking);
+      if (document) {
+        const banner = document.createElement("div");
+        banner.className = "socket-notice";
+        banner.textContent = `Booking cancelled (ID: ${booking._id})`;
+        banner.style.position = "fixed";
+        banner.style.right = "20px";
+        banner.style.bottom = "20px";
+        banner.style.background = "#b02a37";
+        banner.style.color = "#fff";
+        banner.style.padding = "10px 14px";
+        banner.style.borderRadius = "6px";
+        banner.style.zIndex = 10000;
+        document.body.appendChild(banner);
+        setTimeout(() => banner.remove(), 5000);
+      }
+    });
+  } catch (err) {
+    console.warn("Socket.IO client initialization failed:", err);
+  }
+})();

@@ -41,6 +41,10 @@ router.post("/", auth(), async (req, res) => {
     });
 
     await booking.save();
+    // Emit websocket event for new booking
+    const io = req.app && req.app.locals && req.app.locals.io;
+    if (io) io.emit("booking:created", booking);
+
     res.status(201).json({ message: "Booking successful", booking });
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -61,6 +65,9 @@ router.put("/cancel/:bookingId", auth(), async (req, res) => {
 
     booking.status = "cancelled";
     await booking.save();
+    // Emit websocket event for cancelled booking
+    const io = req.app && req.app.locals && req.app.locals.io;
+    if (io) io.emit("booking:cancelled", booking);
 
     res.json({ message: "Booking cancelled", booking });
   } catch (err) {
