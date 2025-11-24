@@ -11,7 +11,18 @@ function isOverlapping(start1, end1, start2, end2) {
 // Book a car
 router.post("/", auth(), async (req, res) => {
   try {
-    const { carId, startDate, endDate } = req.body;
+    const {
+      carId,
+      startDate,
+      endDate,
+      pickupLocation,
+      dropoffLocation,
+      pickupLat,
+      pickupLng,
+      dropoffLat,
+      dropoffLng,
+      distanceKm,
+    } = req.body;
     const start = new Date(startDate);
     const end = new Date(endDate);
 
@@ -29,7 +40,9 @@ router.post("/", auth(), async (req, res) => {
 
     for (let booking of existingBookings) {
       if (isOverlapping(start, end, booking.startDate, booking.endDate)) {
-        return res.status(400).json({ message: "Car is already booked for these dates" });
+        return res
+          .status(400)
+          .json({ message: "Car is already booked for these dates" });
       }
     }
 
@@ -38,6 +51,13 @@ router.post("/", auth(), async (req, res) => {
       carId,
       startDate: start,
       endDate: end,
+      pickupLocation: pickupLocation || undefined,
+      dropoffLocation: dropoffLocation || undefined,
+      pickupLat: pickupLat ? Number(pickupLat) : undefined,
+      pickupLng: pickupLng ? Number(pickupLng) : undefined,
+      dropoffLat: dropoffLat ? Number(dropoffLat) : undefined,
+      dropoffLng: dropoffLng ? Number(dropoffLng) : undefined,
+      distanceKm: distanceKm ? Number(distanceKm) : undefined,
     });
 
     await booking.save();
@@ -59,7 +79,10 @@ router.put("/cancel/:bookingId", auth(), async (req, res) => {
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
     // Only booking owner or admin can cancel
-    if (booking.userId.toString() !== req.user.id && req.user.role !== "admin") {
+    if (
+      booking.userId.toString() !== req.user.id &&
+      req.user.role !== "admin"
+    ) {
       return res.status(403).json({ message: "Access denied" });
     }
 

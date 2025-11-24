@@ -102,6 +102,10 @@ function displayBookings(bookings) {
                 <p><strong>Start Date:</strong> ${new Date(booking.startDate).toLocaleDateString()}</p>
                 <p><strong>End Date:</strong> ${new Date(booking.endDate).toLocaleDateString()}</p>
                 <p><strong>Status:</strong> <span class="status-${booking.status}">${booking.status}</span></p>
+                ${booking.pickupLocation ? `<p><strong>Pickup:</strong> ${booking.pickupLocation}</p>` : ''}
+                ${booking.dropoffLocation ? `<p><strong>Drop-off:</strong> ${booking.dropoffLocation}</p>` : ''}
+                ${booking.distanceKm ? `<p><strong>Distance:</strong> ${booking.distanceKm} km</p>` : ''}
+                ${booking.pickupLocation && booking.dropoffLocation ? `<p><strong>Map:</strong> <a href="https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(booking.pickupLocation)}&destination=${encodeURIComponent(booking.dropoffLocation)}" target="_blank">Open route in Google Maps</a></p>` : ''}
             </div>
             <div class="booking-actions">
                 ${booking.status === 'booked' ? 

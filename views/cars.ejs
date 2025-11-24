@@ -93,6 +93,18 @@
               <input type="date" id="endDate" name="endDate" required />
             </div>
             <div class="form-group">
+              <label for="pickupLocation">Pickup Location (address):</label>
+              <input type="text" id="pickupLocation" name="pickupLocation" placeholder="e.g. 123 Main St, City" required />
+            </div>
+            <div class="form-group">
+              <label for="dropoffLocation">Drop-off Location (address):</label>
+              <input type="text" id="dropoffLocation" name="dropoffLocation" placeholder="e.g. 456 Other St, City" required />
+            </div>
+            <div class="form-group">
+              <label>Route Preview:</label>
+              <div id="routePreview">Enter pickup and drop-off to preview route and distance</div>
+            </div>
+            <div class="form-group">
               <label>Total Cost:</label>
               <div id="totalCost">$0</div>
             </div>
@@ -301,11 +313,73 @@
             }
 
             const formData = new FormData(e.target);
+            const pickupLocation = formData.get("pickupLocation");
+            const dropoffLocation = formData.get("dropoffLocation");
+
+            async function geocode(address) {
+              const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`;
+              try {
+                const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                const arr = await res.json();
+                if (arr && arr.length > 0) {
+                  return { lat: parseFloat(arr[0].lat), lng: parseFloat(arr[0].lon) };
+                }
+              } catch (err) {
+                console.error('Geocode error', err);
+              }
+              return null;
+            }
+
+            function haversineKm(a, b) {
+              const toRad = (v) => (v * Math.PI) / 180;
+              const R = 6371; // km
+              const dLat = toRad(b.lat - a.lat);
+              const dLon = toRad(b.lng - a.lng);
+              const lat1 = toRad(a.lat);
+              const lat2 = toRad(b.lat);
+
+              const sinDLat = Math.sin(dLat / 2) * Math.sin(dLat / 2);
+              const sinDLon = Math.sin(dLon / 2) * Math.sin(dLon / 2);
+              const aCalc = sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon;
+              const c = 2 * Math.atan2(Math.sqrt(aCalc), Math.sqrt(1 - aCalc));
+              return R * c;
+            }
+
             const bookingData = {
               carId: formData.get("carId"),
               startDate: formData.get("startDate"),
               endDate: formData.get("endDate"),
+              pickupLocation,
+              dropoffLocation,
             };
+            
+
+            // Geocode addresses and compute distance (best-effort using Nominatim)
+            let pickupCoord = null;
+            let dropoffCoord = null;
+            try {
+              pickupCoord = await geocode(pickupLocation);
+              dropoffCoord = await geocode(dropoffLocation);
+            } catch (err) {
+              console.warn('Geocoding failed', err);
+            }
+
+            if (pickupCoord && dropoffCoord) {
+              const km = haversineKm(pickupCoord, dropoffCoord);
+              bookingData.pickupLat = pickupCoord.lat;
+              bookingData.pickupLng = pickupCoord.lng;
+              bookingData.dropoffLat = dropoffCoord.lat;
+              bookingData.dropoffLng = dropoffCoord.lng;
+              bookingData.distanceKm = Math.round(km * 100) / 100; // two decimals
+
+              // Update route preview
+              const origin = encodeURIComponent(pickupLocation);
+              const dest = encodeURIComponent(dropoffLocation);
+              const mapsLink = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}`;
+              document.getElementById('routePreview').innerHTML = `Distance: <strong>${bookingData.distanceKm} km</strong> — <a href="${mapsLink}" target="_blank">Open in Google Maps</a>`;
+            } else {
+              document.getElementById('routePreview').textContent = 'Could not determine exact route/distance (geocoding failed). A map link will still be provided.';
+            }
 
             const messageDiv = document.getElementById("bookingMessage");
 
