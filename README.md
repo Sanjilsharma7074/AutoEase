@@ -58,88 +58,140 @@ carRental/
 npm install
 ```
 
-2. Create a `.env` file in the project root with:
+# AutoEase - Car Rental Service
+
+AutoEase is a full-stack car rental web application built with Node.js, Express, MongoDB (Mongoose), EJS, and Socket.IO. It provides user authentication, car listing and management, booking functionality, and an admin dashboard.
+
+**Status:** README updated to reflect current routes, scripts, and license.
+
+## 🚀 Features
+
+- User signup/login with JWT authentication
+- Role-based access control (admin, user)
+- Browse cars with images and pricing
+- Create bookings with server-side date-overlap validation
+- Users can view and cancel their bookings
+- Admin dashboard: manage cars and view all bookings
+- Real-time events support via Socket.IO (server exposes `app.locals.io`)
+
+## 🧰 Tech Stack
+
+- Backend: Node.js, Express.js
+- Database: MongoDB with Mongoose
+- Auth: JSON Web Tokens (`jsonwebtoken`), password hashing (`bcryptjs`)
+- Views: EJS templates
+- Real-time: Socket.IO
+- Dev: `nodemon` for development
+
+## Prerequisites
+
+- Node.js (v14+ recommended)
+- npm
+- A running MongoDB instance or Atlas cluster
+
+## Installation
+
+Clone the repo and install dependencies:
+
+```powershell
+git clone <repo-url>
+cd carRental
+npm install
+```
+
+Create a `.env` file in the project root with the following variables:
 
 ```env
-MONGO_URI=mongodb+srv://<username>:<password>@<cluster>/<db>?retryWrites=true&w=majority
-JWT_SECRET=your-very-secret-key
+MONGO_URI=your_mongo_connection_string
+JWT_SECRET=your_jwt_secret
 PORT=5000
 ```
 
-3. Run the app
+## Scripts
 
-```bash
-npm run dev   # with nodemon
+- `npm start` — Run with Node (`node server.js`)
+- `npm run dev` — Run with `nodemon` (auto-restart during development)
+
+Example (PowerShell):
+
+```powershell
+npm run dev
 # or
-npm start     # plain node
+npm start
 ```
 
-Server runs on `http://localhost:5000` by default.
+By default the server listens on `PORT` from `.env` or `5000`.
 
-## 🌐 Pages (EJS Views)
+## Project Structure
 
-- `/` — Home
-- `/login` — Login
-- `/signup` — Signup
-- `/cars` — Browse cars and book
-- `/bookings` — My bookings (requires login)
-- `/admin` — Admin dashboard (requires admin)
-- `/edit-car?id=<carId>` — Edit car (admin)
-- `/users` — User management (admin)
+```
+carRental/
+├─ server.js                # App entry (Express + Socket.IO)
+├─ package.json
+├─ .env                    # Environment variables (not committed)
+├─ Routes/
+│  ├─ authRoutes.js        # Mounted at /auth
+│  ├─ userRoutes.js        # Mounted at /users
+│  ├─ carRoutes.js         # Mounted at /api/cars
+│  ├─ bookingRoutes.js     # Mounted at /api/bookings
+│  └─ viewRoutes.js        # Root view routes (pages)
+├─ models/                 # Mongoose models: User, Car, Booking
+├─ middleware/             # auth middleware (JWT + role guard)
+├─ views/                  # EJS templates (index, cars, admin, bookings, login, signup, editCar, etc.)
+├─ public/                 # Static assets (css, js, images)
+└─ services/               # (optional) helper services
+```
 
-## 🔒 Authentication
+## Routes & Views (summary)
 
-- Login returns a JWT and basic user info `{ id, name, role }`.
-- Client stores token in `localStorage` and sends `Authorization: Bearer <token>`.
-- Middleware `auth(roles)` verifies token and optionally enforces roles.
+Base URL: `http://localhost:<PORT>`
 
-## 🛣️ API Reference
+- Views (rendered pages)
 
-Base: `http://localhost:5000`
+  - `/` — Home (cars list)
+  - `/login` — Login page
+  - `/signup` — Signup page
+  - `/cars` — Browse cars and book
+  - `/bookings` — User bookings (requires login)
+  - `/admin` — Admin dashboard (requires admin)
+  - `/edit-car?id=<carId>` — Edit car (admin)
 
-### Auth (`/auth`)
+- API endpoints (server-side)
+  - Auth: `POST /auth/signup`, `POST /auth/login`
+  - Users: routes are mounted at `/users` (check `Routes/userRoutes.js` for endpoints)
+  - Cars: mounted at `/api/cars` (GET, POST, PUT, DELETE as implemented)
+  - Bookings: mounted at `/api/bookings` (create, cancel, list)
 
-- `POST /auth/signup` — Register user `{ name, email, password, role? }`
-- `POST /auth/login` — Login `{ email, password }` → `{ token, user }`
+Note: `userRoutes` is mounted at `/users` (not `/api/users`) in the current code.
 
-### Users (`/api/users`)
+## Authentication
 
-- `POST /api/users/register` — Create user (server-side path)
-- `GET /api/users/all` — List users (admin)
-- `PUT /api/users/:userId/role` — Update role to `admin|user` (admin)
+- Login returns a JWT token and user info.
+- Client stores the token (e.g., `localStorage`) and sends it in the `Authorization: Bearer <token>` header for protected API calls.
+- Server-side middleware (`middleware/auth.js`) verifies tokens and enforces role-based access.
 
-### Cars (`/api/cars`)
+## Socket.IO
 
-- `GET /api/cars` — List cars
-- `POST /api/cars` — Add car (admin)
-- `PUT /api/cars/:carId` — Update car (admin)
-- `DELETE /api/cars/:id` — Delete car (admin)
+The app initializes Socket.IO in `server.js` and attaches the instance to `app.locals.io`, which routes/controllers can use to emit real-time events (e.g., booking notifications).
 
-### Bookings (`/api/bookings`)
+## Environment & Common Issues
 
-- `POST /api/bookings` — Create booking (auth) — checks date overlap
-- `PUT /api/bookings/cancel/:bookingId` — Cancel booking (owner/admin)
-- `GET /api/bookings/my-bookings` — Current user's bookings (auth)
-- `GET /api/bookings/all` — All bookings (admin)
+- Ensure `MONGO_URI` is valid and allows connections from your machine.
+- Verify `JWT_SECRET` is set and consistent between environment and any running processes.
+- If static files do not load, confirm `public/` is served and asset paths in EJS are correct.
 
-## 📌 Notes
+## Contributing
 
-- Booking overlap is validated on the server (`bookingRoutes.js`).
-- Car availability on the list view is optimistic; the booking endpoint is authoritative.
-- Passwords are hashed via a Mongoose pre-save hook; tokens expire in 1 hour.
+If you'd like to contribute, open an issue or submit a PR with clear description and tests where possible.
 
-## 🧪 Sample Admin Flow
+## License
 
-1. Sign up a user via `/auth/signup` with role `admin` (or update via DB).
-2. Login at `/login` to get a JWT stored in the browser.
-3. Access `/admin` to manage cars and view bookings.
+This project uses the `ISC` license (see `package.json`).
 
-## 🛠️ Troubleshooting
+---
 
-- Ensure MongoDB connection string is valid and IP is whitelisted.
-- If JWT errors occur, confirm `JWT_SECRET` matches between login and middleware.
-- If static assets don’t load, verify `public/` is served and paths are correct.
+If you want, I can also:
 
-## 📄 License
-
-MIT
+- add sample curl requests for the main endpoints
+- add a short developer checklist for creating admin users or seeding data
+- run a quick search in the repo to list all exported endpoints and include them verbatim in the README
