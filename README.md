@@ -187,11 +187,3 @@ If you'd like to contribute, open an issue or submit a PR with clear description
 ## License
 
 This project uses the `ISC` license (see `package.json`).
-
----
-
-If you want, I can also:
-
-- add sample curl requests for the main endpoints
-- add a short developer checklist for creating admin users or seeding data
-- run a quick search in the repo to list all exported endpoints and include them verbatim in the README
