@@ -105,5 +105,12 @@ When no image is provided or loading fails, cars fall back to https://placehold.
 - IMPLEMENTATION_GUIDE.md – implementation notes
 - TESTING_GUIDE.md / QUICK_TEST.md – lightweight test guidance
 
+## Security & Secrets
+- Use `.env.example` as a template and keep your real `.env` untracked (see `.gitignore`).
+- If a secret is ever committed, GitHub Push Protection will block the push. Purge the secret from history using `git filter-repo` or BFG, then rotate the credential.
+- Example to remove `.env` from history (requires git-filter-repo):
+	- `git filter-repo --path .env --invert-paths`
+	- `git push --force`
+
 ## License
 ISC (see package.json).
