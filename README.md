@@ -1,189 +1,109 @@
-# AutoEase - Car Rental Service
+# AutoEase - Car Rental Platform
 
-A full-stack car rental web application built with Node.js, Express, MongoDB (Mongoose), and EJS. It supports user authentication, car management, bookings, and an admin dashboard.
+AutoEase is a full-stack car rental app built with Node.js, Express, MongoDB (Mongoose), EJS, and Socket.IO. It supports email+OTP signup, JWT sessions, optional Google OAuth, car inventory management, bookings with date-overlap validation, and a simple admin dashboard.
 
-## 🚀 Features
+## Features
+- Email+OTP signup and JWT login; optional Google OAuth when credentials exist
+- Role-based access (admin, user) enforced via middleware
+- Car catalogue with pricing and image fallback placeholder
+- Booking flow with server-side overlap checks; users can view/cancel their own bookings
+- Admin tools to add, edit, and delete cars and view all bookings
+- Socket.IO hooks for real-time booking events
 
-- User signup/login with JWT authentication
-- Role-based access control (admin, user)
-- Browse cars with images and pricing
-- Book cars with date conflict validation
-- View/cancel bookings (users)
-- Admin dashboard: manage cars (add/edit/delete) and view all bookings
-- Admin user management page to view and update roles
-- Responsive, modern UI with EJS templates and CSS
+## Tech Stack
+- Backend: Express 5, MongoDB with Mongoose
+- Auth: JWT, bcryptjs, express-session, Passport (Google)
+- Views: EJS templates, static assets in public/
+- Realtime: Socket.IO
+- Dev: nodemon
 
-## 🧰 Tech Stack
-
-- Backend: Node.js, Express.js
-- Database: MongoDB with Mongoose
-- Auth: JWT, bcryptjs
-- Views: EJS templates
-- Frontend: HTML, CSS, Vanilla JS
-
-## 📁 Folder Structure
-
-```
-carRental/
-├── server.js                 # App entry: Express, routes, DB
-├── package.json              # Scripts and dependencies
-├── .env                      # Environment variables (not committed)
-├── Routes/
-│   ├── authRoutes.js         # /auth/signup, /auth/login
-│   ├── userRoutes.js         # /api/users (register, list, role update)
-│   ├── carRoutes.js          # /api/cars (CRUD)
-│   ├── bookingRoutes.js      # /api/bookings (book, cancel, list)
-│   └── viewRoutes.js         # Renders EJS pages
-├── models/
-│   ├── User.js               # name, email, password (hashed), role
-│   ├── Car.js                # model, type, pricePerDay, imageUrl, availability
-│   └── Booking.js            # userId, carId, dates, status
-├── middleware/
-│   └── auth.js               # JWT verify + role guard
-├── views/                    # EJS templates (UI)
-│   ├── index.ejs, cars.ejs, admin.ejs, bookings.ejs
-│   ├── login.ejs, signup.ejs, layout.ejs, editCar.ejs, users.ejs
-├── public/
-│   ├── css/style.css         # Styles
-│   └── js/
-│       ├── auth.js           # Client-side auth helpers
-│       └── main.js           # Page interactions
-```
-
-## ⚙️ Setup
-
-1. Install dependencies
-
-```bash
-npm install
-```
-
-# AutoEase - Car Rental Service
-
-AutoEase is a full-stack car rental web application built with Node.js, Express, MongoDB (Mongoose), EJS, and Socket.IO. It provides user authentication, car listing and management, booking functionality, and an admin dashboard.
-
-**Status:** README updated to reflect current routes, scripts, and license.
-
-## 🚀 Features
-
-- User signup/login with JWT authentication
-- Role-based access control (admin, user)
-- Browse cars with images and pricing
-- Create bookings with server-side date-overlap validation
-- Users can view and cancel their bookings
-- Admin dashboard: manage cars and view all bookings
-- Real-time events support via Socket.IO (server exposes `app.locals.io`)
-
-## 🧰 Tech Stack
-
-- Backend: Node.js, Express.js
-- Database: MongoDB with Mongoose
-- Auth: JSON Web Tokens (`jsonwebtoken`), password hashing (`bcryptjs`)
-- Views: EJS templates
-- Real-time: Socket.IO
-- Dev: `nodemon` for development
-
-## Prerequisites
-
-- Node.js (v14+ recommended)
-- npm
-- A running MongoDB instance or Atlas cluster
-
-## Installation
-
-Clone the repo and install dependencies:
-
+## Quick Start
+1) Prereqs: Node 18+ and access to a MongoDB instance (local or Atlas).
+2) Install dependencies:
 ```powershell
-git clone <repo-url>
-cd carRental
 npm install
 ```
-
-Create a `.env` file in the project root with the following variables:
-
+3) Create .env in the repo root:
 ```env
 MONGO_URI=your_mongo_connection_string
 JWT_SECRET=your_jwt_secret
+SESSION_SECRET=your_session_secret
 PORT=5000
+GOOGLE_CLIENT_ID=optional_google_client_id
+GOOGLE_CLIENT_SECRET=optional_google_client_secret
+```
+4) Run the app:
+```powershell
+npm run dev   # nodemon
+# or
+npm start     # node server.js
+```
+Server listens on PORT (default 5000).
+
+## Seeding Cars
+Populate a small catalogue with a reliable placeholder image:
+```powershell
+node seedCars.js
 ```
 
 ## Scripts
+- `npm run dev` – start with nodemon (auto-reload)
+- `npm start` – start with node
 
-- `npm start` — Run with Node (`node server.js`)
-- `npm run dev` — Run with `nodemon` (auto-restart during development)
-
-Example (PowerShell):
-
-```powershell
-npm run dev
-# or
-npm start
+## Folder Structure (what lives where)
+```
+server.js               Express app entry, Mongo connection, Socket.IO
+package.json            Scripts and dependencies
+Routes/
+	authRoutes.js         Email+OTP signup/verify/resend, JWT login, Google OAuth
+	userRoutes.js         Basic register endpoint (mounted at /users)
+	carRoutes.js          CRUD for cars (admin-only writes)
+	bookingRoutes.js      Create/cancel/list bookings with overlap checks
+	viewRoutes.js         EJS page routes
+models/
+	User.js               Fields: name, email, password (hashed), role, emailVerified, otp, googleId
+	Car.js                Fields: model, type, pricePerDay, availability, imageUrl (placeholder default)
+	Booking.js            Fields: userId, carId, startDate, endDate, status, locations, distance
+middleware/
+	auth.js               JWT verification and role guard
+	passport.js           Google strategy (enabled when env vars are present)
+services/
+	emailService.js       OTP generation and delivery helper
+public/                 CSS and client JS (auth helpers, page interactions)
+views/                  EJS templates (index, cars, bookings, admin, login, signup, editCar, verify-otp, layout)
+seedCars.js             Seeds ~21 cars with placeholder images
 ```
 
-By default the server listens on `PORT` from `.env` or `5000`.
+## API and Pages
+- Auth (mounted at /auth): signup (OTP), verify-otp, resend-otp, login, Google OAuth callback in [Routes/authRoutes.js](Routes/authRoutes.js)
+- Users (mounted at /users): register in [Routes/userRoutes.js](Routes/userRoutes.js)
+- Cars (mounted at /api/cars): list (public), create/update/delete (admin) in [Routes/carRoutes.js](Routes/carRoutes.js)
+- Bookings (mounted at /api/bookings): create, cancel, my-bookings, admin all-bookings in [Routes/bookingRoutes.js](Routes/bookingRoutes.js)
+- Views (mounted at /): index, cars, bookings, admin, login, signup, verify-otp, edit-car in [Routes/viewRoutes.js](Routes/viewRoutes.js)
 
-## Project Structure
+## Auth Flow
+- Email signup: `POST /auth/signup` stores user with OTP -> `POST /auth/verify-otp` finalizes and returns JWT.
+- Resend OTP: `POST /auth/resend-otp` for unverified users.
+- Login: `POST /auth/login` returns JWT; JWT goes in `Authorization: Bearer <token>` for protected calls.
+- Google OAuth: works only when GOOGLE_CLIENT_ID/SECRET are set; otherwise endpoints return a friendly message.
+- Role guard: pass roles to middleware/auth.js (admin-only for car writes and booking list-all).
 
-```
-carRental/
-├─ server.js                # App entry (Express + Socket.IO)
-├─ package.json
-├─ .env                    # Environment variables (not committed)
-├─ Routes/
-│  ├─ authRoutes.js        # Mounted at /auth
-│  ├─ userRoutes.js        # Mounted at /users
-│  ├─ carRoutes.js         # Mounted at /api/cars
-│  ├─ bookingRoutes.js     # Mounted at /api/bookings
-│  └─ viewRoutes.js        # Root view routes (pages)
-├─ models/                 # Mongoose models: User, Car, Booking
-├─ middleware/             # auth middleware (JWT + role guard)
-├─ views/                  # EJS templates (index, cars, admin, bookings, login, signup, editCar, etc.)
-├─ public/                 # Static assets (css, js, images)
-└─ services/               # (optional) helper services
-```
+## Realtime Hooks
+Socket.IO is initialized in [server.js](server.js); routes emit `booking:created` and `booking:cancelled` events when io is available via `app.locals.io`.
 
-## Routes & Views (summary)
+## Images
+When no image is provided or loading fails, cars fall back to https://placehold.co/600x360?text=Car+Image (used in models and seeder; frontend also guards with onerror).
 
-Base URL: `http://localhost:<PORT>`
+## Troubleshooting
+- Connection errors: confirm MONGO_URI and network access (Atlas IP allowlist, etc.).
+- Invalid token: ensure JWT_SECRET in .env matches the running process.
+- Google OAuth: set GOOGLE_CLIENT_ID/SECRET and restart; otherwise endpoints will respond with a 503 message.
+- Static assets missing: public/ must remain mounted; check references in views.
 
-- Views (rendered pages)
-
-  - `/` — Home (cars list)
-  - `/login` — Login page
-  - `/signup` — Signup page
-  - `/cars` — Browse cars and book
-  - `/bookings` — User bookings (requires login)
-  - `/admin` — Admin dashboard (requires admin)
-  - `/edit-car?id=<carId>` — Edit car (admin)
-
-- API endpoints (server-side)
-  - Auth: `POST /auth/signup`, `POST /auth/login`
-  - Users: routes are mounted at `/users` (check `Routes/userRoutes.js` for endpoints)
-  - Cars: mounted at `/api/cars` (GET, POST, PUT, DELETE as implemented)
-  - Bookings: mounted at `/api/bookings` (create, cancel, list)
-
-Note: `userRoutes` is mounted at `/users` (not `/api/users`) in the current code.
-
-## Authentication
-
-- Login returns a JWT token and user info.
-- Client stores the token (e.g., `localStorage`) and sends it in the `Authorization: Bearer <token>` header for protected API calls.
-- Server-side middleware (`middleware/auth.js`) verifies tokens and enforces role-based access.
-
-## Socket.IO
-
-The app initializes Socket.IO in `server.js` and attaches the instance to `app.locals.io`, which routes/controllers can use to emit real-time events (e.g., booking notifications).
-
-## Environment & Common Issues
-
-- Ensure `MONGO_URI` is valid and allows connections from your machine.
-- Verify `JWT_SECRET` is set and consistent between environment and any running processes.
-- If static files do not load, confirm `public/` is served and asset paths in EJS are correct.
-
-## Contributing
-
-If you'd like to contribute, open an issue or submit a PR with clear description and tests where possible.
+## Additional Docs
+- SETUP_GUIDE.md – environment and installation details
+- IMPLEMENTATION_GUIDE.md – implementation notes
+- TESTING_GUIDE.md / QUICK_TEST.md – lightweight test guidance
 
 ## License
-
-This project uses the `ISC` license (see `package.json`).
+ISC (see package.json).

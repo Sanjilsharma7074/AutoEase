@@ -94,5 +94,31 @@
     <script src="/js/auth.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/main.js"></script>
+    <script>
+      // Handle Google OAuth redirect with token in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get("token");
+      const userParam = urlParams.get("user");
+
+      if (token && userParam) {
+        try {
+          const user = JSON.parse(userParam);
+          // Store token and user data
+          localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(user));
+
+          // Show welcome message
+          alert(
+            `Welcome ${user.name}! You've successfully signed up with Google.`
+          );
+
+          // Clean URL and reload to update nav
+          window.history.replaceState({}, document.title, "/");
+          location.reload();
+        } catch (e) {
+          console.error("Error parsing user data:", e);
+        }
+      }
+    </script>
   </body>
 </html>

@@ -52,6 +52,44 @@
         <div class="auth-form">
           <h2>Create Your Account</h2>
           <div id="message" class="message"></div>
+
+          <!-- Google OAuth Button -->
+          <div
+            id="googleOAuthButton"
+            style="margin-bottom: 20px; display: block"
+          >
+            <a
+              href="/auth/google"
+              class="btn btn-google"
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                background-color: #ffffff;
+                color: #333;
+                border: 1px solid #ddd;
+                text-decoration: none;
+                width: 100%;
+                padding: 10px;
+              "
+            >
+              <i class="fab fa-google"></i> Sign up with Google
+            </a>
+          </div>
+
+          <div
+            id="orDivider"
+            style="
+              text-align: center;
+              margin: 20px 0;
+              color: #666;
+              display: block;
+            "
+          >
+            <span>OR</span>
+          </div>
+
           <form id="signupForm">
             <div class="form-group">
               <label for="name">Full Name:</label>
@@ -115,9 +153,12 @@
 
             if (response.ok) {
               messageDiv.innerHTML =
-                '<div class="success">Account created successfully! Redirecting to login...</div>';
+                '<div class="success">OTP sent to your email! Please verify to complete signup.</div>';
+              // Redirect to OTP verification page
               setTimeout(() => {
-                window.location.href = "/login";
+                window.location.href = `/verify-otp?email=${encodeURIComponent(
+                  email
+                )}`;
               }, 2000);
             } else {
               messageDiv.innerHTML = `<div class="error">${
@@ -129,6 +170,10 @@
               '<div class="error">Network error. Please try again.</div>';
           }
         });
+
+      // Optional: If you want to provide feedback when Google creds are missing,
+      // we can probe a lightweight status endpoint instead of hiding the button.
+      // The button remains visible to allow users to try Google login.
     </script>
   </body>
 </html>

@@ -9,6 +9,12 @@ const userSchema = new mongoose.Schema({
   },
   password: String,
   role: { type: String, enum: ["admin", "user"], default: "user" },
+  emailVerified: { type: Boolean, default: false },
+  otp: String,
+  otpExpiry: Date,
+  googleId: String,
+  profilePhoto: String,
+  createdAt: { type: Date, default: Date.now },
 });
 
 userSchema.pre("save", async function (next) {

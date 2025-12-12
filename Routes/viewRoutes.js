@@ -16,6 +16,11 @@ router.get("/signup", (req, res) => {
   res.render("signup");
 });
 
+// OTP Verification page
+router.get("/verify-otp", (req, res) => {
+  res.render("verify-otp");
+});
+
 // Cars page
 router.get("/cars", (req, res) => {
   res.render("cars");

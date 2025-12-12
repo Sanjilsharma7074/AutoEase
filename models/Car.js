@@ -10,7 +10,7 @@ const carSchema = new mongoose.Schema({
   },
   imageUrl: {
     type: String,
-    default: "",
+    default: "https://placehold.co/600x360?text=Car+Image", // Default car image (reliable placeholder)
   },
 });
 
