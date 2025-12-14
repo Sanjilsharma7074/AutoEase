@@ -182,12 +182,10 @@ router.get("/google", (req, res, next) => {
       next
     );
   }
-  return res
-    .status(503)
-    .json({
-      message:
-        "Google OAuth not configured. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env and restart.",
-    });
+  return res.status(503).json({
+    message:
+      "Google OAuth not configured. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env and restart.",
+  });
 });
 
 router.get("/google/callback", (req, res, next) => {
@@ -204,6 +202,10 @@ router.get("/google/callback", (req, res, next) => {
       async () => {
         try {
           const user = req.user;
+          // If Google account has no local password, force set-password flow
+          if (!user.password) {
+            return res.redirect("/auth/set-password");
+          }
           const token = jwt.sign(
             { id: user._id, role: user.role, email: user.email },
             process.env.JWT_SECRET,
@@ -224,6 +226,96 @@ router.get("/google/callback", (req, res, next) => {
     );
   }
   return res.status(503).send("Google OAuth not configured");
+});
+
+// Require authentication helper
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
+  }
+  return res.redirect("/login");
+}
+
+// Render set-password page for passwordless (Google-only) accounts
+router.get("/set-password", ensureAuthenticated, (req, res) => {
+  if (req.user && !req.user.password) {
+    return res.render("set-password", {
+      title: "Set Password",
+      user: {
+        name: req.user.name,
+        email: req.user.email,
+      },
+      error: null,
+    });
+  }
+  return res.redirect("/");
+});
+
+// Handle setting a new local password
+router.post("/set-password", ensureAuthenticated, async (req, res) => {
+  try {
+    const { newPassword, confirmPassword } = req.body;
+
+    if (!newPassword || !confirmPassword) {
+      return res.status(400).render("set-password", {
+        title: "Set Password",
+        user: { name: req.user.name, email: req.user.email },
+        error: "Please enter and confirm your new password",
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).render("set-password", {
+        title: "Set Password",
+        user: { name: req.user.name, email: req.user.email },
+        error: "Passwords do not match",
+      });
+    }
+
+    // Basic strength check (optional, can be enhanced)
+    if (newPassword.length < 8) {
+      return res.status(400).render("set-password", {
+        title: "Set Password",
+        user: { name: req.user.name, email: req.user.email },
+        error: "Password must be at least 8 characters",
+      });
+    }
+
+    // Only allow setting password if currently null or empty
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.redirect("/login");
+    }
+    if (user.password) {
+      return res.redirect("/");
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    // Issue JWT for immediate login experience after setting password
+    const token = jwt.sign(
+      { id: user._id, role: user.role, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    return res.redirect(
+      `/?token=${token}&user=${JSON.stringify({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      })}&passwordSet=1`
+    );
+  } catch (err) {
+    console.error("Error setting password:", err);
+    return res.status(500).render("set-password", {
+      title: "Set Password",
+      user: { name: req.user?.name, email: req.user?.email },
+      error: "An error occurred. Please try again.",
+    });
+  }
 });
 
 module.exports = router;
