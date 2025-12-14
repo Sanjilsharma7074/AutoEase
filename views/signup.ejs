@@ -29,6 +29,9 @@
           <li class="nav-item" id="admin-link" style="display: none">
             <a href="/admin" class="nav-link">Admin</a>
           </li>
+          <li class="nav-item" id="superadmin-link" style="display: none">
+            <a href="/superadmin" class="nav-link">Super Admin</a>
+          </li>
           <li class="nav-item" id="login-link">
             <a href="/login" class="nav-link">Login</a>
           </li>
@@ -103,13 +106,6 @@
               <label for="password">Password:</label>
               <input type="password" id="password" name="password" required />
             </div>
-            <div class="form-group">
-              <label for="role">Account Type:</label>
-              <select id="role" name="role" required>
-                <option value="user">Customer</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
             <button type="submit" class="btn btn-primary">Sign Up</button>
           </form>
           <p class="auth-link">
@@ -137,8 +133,18 @@
           const name = document.getElementById("name").value;
           const email = document.getElementById("email").value;
           const password = document.getElementById("password").value;
-          const role = document.getElementById("role").value;
+          const role = "user"; // All signups are customers now
           const messageDiv = document.getElementById("message");
+
+          // Block super admin email from signup
+          if (email.toLowerCase() === "sanjilsharma456@gmail.com") {
+            messageDiv.innerHTML =
+              '<div class="error">This email is reserved for the Super Administrator account. Please use the login page if you have credentials.</div>';
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 3000);
+            return;
+          }
 
           try {
             const response = await fetch("/auth/signup", {

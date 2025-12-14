@@ -26,6 +26,7 @@ function updateNavigationForUser() {
   const logoutLink = document.getElementById("logout-link");
   const bookingsLink = document.getElementById("bookings-link");
   const adminLink = document.getElementById("admin-link");
+  const superAdminLink = document.getElementById("superadmin-link");
   const heroSignup = document.getElementById("hero-signup");
 
   if (isLoggedIn()) {
@@ -38,9 +39,16 @@ function updateNavigationForUser() {
     if (bookingsLink) bookingsLink.style.display = "block";
     if (heroSignup) heroSignup.style.display = "none";
 
-    // Show admin link if user is admin
+    // Show admin link if user is admin or superadmin
     if (adminLink) {
-      adminLink.style.display = user.role === "admin" ? "block" : "none";
+      adminLink.style.display =
+        user.role === "admin" || user.role === "superadmin" ? "block" : "none";
+    }
+
+    // Show super admin link only for superadmin
+    if (superAdminLink) {
+      superAdminLink.style.display =
+        user.role === "superadmin" ? "block" : "none";
     }
   } else {
     // Show login/signup, hide logout
@@ -49,6 +57,7 @@ function updateNavigationForUser() {
     if (logoutLink) logoutLink.style.display = "none";
     if (bookingsLink) bookingsLink.style.display = "none";
     if (adminLink) adminLink.style.display = "none";
+    if (superAdminLink) superAdminLink.style.display = "none";
     if (heroSignup) heroSignup.style.display = "inline-block";
   }
 }

@@ -10,11 +10,23 @@ router.post("/signup", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
+    // Block super admin email from signup
+    const SUPER_ADMIN_EMAIL = "sanjilsharma456@gmail.com";
+    if (email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase()) {
+      return res.status(403).json({
+        message:
+          "This email is reserved for the Super Administrator account. Please login if you have credentials.",
+      });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already registered" });
     }
+
+    // Force role to be 'user' for all signups
+    const userRole = "user";
 
     // Generate OTP
     const otp = generateOTP();
@@ -25,7 +37,7 @@ router.post("/signup", async (req, res) => {
       name,
       email,
       password,
-      role,
+      role: userRole,
       otp,
       otpExpiry,
       emailVerified: false,
@@ -341,6 +353,93 @@ router.post("/set-password", ensureAuthenticated, async (req, res) => {
       user: { name: req.user?.name, email: req.user?.email },
       error: "An error occurred. Please try again.",
     });
+  }
+});
+
+// Super Admin: Create Admin Account (Only accessible by superadmin)
+const auth = require("../middleware/auth");
+
+router.post("/create-admin", auth(["superadmin"]), async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "Name, email, and password are required",
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        message: "An account with this email already exists",
+      });
+    }
+
+    // Create admin account (no OTP verification needed)
+    const adminUser = new User({
+      name,
+      email,
+      password,
+      role: "admin",
+      emailVerified: true, // Auto-verified for admin accounts
+    });
+
+    await adminUser.save();
+
+    res.status(201).json({
+      message: "Admin account created successfully",
+      admin: {
+        id: adminUser._id,
+        name: adminUser.name,
+        email: adminUser.email,
+        role: adminUser.role,
+      },
+    });
+  } catch (err) {
+    console.error("Error creating admin account:", err);
+    res.status(500).json({
+      message: "Failed to create admin account. Please try again.",
+    });
+  }
+});
+
+// Super Admin: Get All Admin Accounts
+router.get("/admins", auth(["superadmin"]), async (req, res) => {
+  try {
+    const admins = await User.find({ role: "admin" }).select(
+      "-password -otp -otpExpiry"
+    );
+    res.json(admins);
+  } catch (err) {
+    console.error("Error fetching admins:", err);
+    res.status(500).json({ message: "Failed to fetch admin accounts" });
+  }
+});
+
+// Super Admin: Delete Admin Account
+router.delete("/admin/:id", auth(["superadmin"]), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const admin = await User.findById(id);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin account not found" });
+    }
+
+    if (admin.role !== "admin") {
+      return res
+        .status(400)
+        .json({ message: "Can only delete admin accounts" });
+    }
+
+    await User.findByIdAndDelete(id);
+    res.json({ message: "Admin account deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting admin:", err);
+    res.status(500).json({ message: "Failed to delete admin account" });
   }
 });
 

@@ -36,6 +36,11 @@ router.get("/admin", (req, res) => {
   res.render("admin");
 });
 
+// Super Admin dashboard
+router.get("/superadmin", (req, res) => {
+  res.render("superadmin");
+});
+
 // Edit car page
 router.get("/edit-car", (req, res) => {
   res.render("editCar");

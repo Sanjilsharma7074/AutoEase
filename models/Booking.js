@@ -6,6 +6,9 @@ const bookingSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    // Snapshot of customer details at time of booking so admin views remain intact
+    customerName: String,
+    customerEmail: String,
     carId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Car",

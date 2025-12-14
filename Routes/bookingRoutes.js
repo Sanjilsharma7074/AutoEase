@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Booking = require("../models/Booking");
 const Car = require("../models/Car");
+const User = require("../models/User");
 const auth = require("../middleware/auth");
 
 function isOverlapping(start1, end1, start2, end2) {
@@ -46,8 +47,13 @@ router.post("/", auth(), async (req, res) => {
       }
     }
 
+    // Snapshot user details to display even if the user is later removed
+    const bookingUser = await User.findById(req.user.id);
+
     const booking = new Booking({
       userId: req.user.id,
+      customerName: bookingUser?.name,
+      customerEmail: bookingUser?.email || req.user.email,
       carId,
       startDate: start,
       endDate: end,

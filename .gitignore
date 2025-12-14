@@ -16,11 +16,27 @@ yarn-error.log*
 logs/
 *.log
 
+# Process artifacts
+*.pid
+*.seed
+
 # OS junk
 .DS_Store
 Thumbs.db
 
-# Runtime
+# Editors / IDEs
+.vscode/
+.idea/
+
+# Runtime / build / cache
 coverage/
 dist/
+build/
+.nyc_output/
+.cache/
+.parcel-cache/
+.eslintcache
 tmp/
+
+# User uploads (optional)
+uploads/

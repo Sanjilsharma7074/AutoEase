@@ -1,56 +1,498 @@
-# AutoEase - Car Rental Platform
+# Car Rental Service
 
-AutoEase is a full-stack car rental app built with Node.js, Express, MongoDB (Mongoose), EJS, and Socket.IO. It supports email+OTP signup, JWT sessions, optional Google OAuth, car inventory management, bookings with date-overlap validation, and a simple admin dashboard.
+A comprehensive, full-stack car rental management system with advanced authentication, role-based access control, and real-time updates. Built for scalability and ease of use.
 
-## Features
-- Email+OTP signup and JWT login; optional Google OAuth when credentials exist
-- Role-based access (admin, user) enforced via middleware
-- Car catalogue with pricing and image fallback placeholder
-- Booking flow with server-side overlap checks; users can view/cancel their own bookings
-- Admin tools to add, edit, and delete cars and view all bookings
-- Socket.IO hooks for real-time booking events
+## 📋 Table of Contents
 
-## Tech Stack
-- Backend: Express 5, MongoDB with Mongoose
-- Auth: JWT, bcryptjs, express-session, Passport (Google)
-- Views: EJS templates, static assets in public/
-- Realtime: Socket.IO
-- Dev: nodemon
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [User Roles & Permissions](#-user-roles--permissions)
+- [API Endpoints](#-api-endpoints)
+- [Super Admin Features](#-super-admin-features)
+- [Database Schema](#-database-schema)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-## Quick Start
-1) Prereqs: Node 18+ and access to a MongoDB instance (local or Atlas).
-2) Install dependencies:
-```powershell
+## ✨ Features
+
+### Core Features
+
+- **User Authentication**
+
+  - Email/Password registration with OTP verification
+  - Google OAuth 2.0 integration
+  - JWT-based token authentication
+  - Secure password hashing with bcryptjs
+
+- **Car Management**
+
+  - Browse available cars with detailed information
+  - Filter by car type (sedan, SUV, hatchback)
+  - Real-time availability checking
+  - Admin dashboard for car inventory management
+
+- **Booking System**
+
+  - Easy car booking with date selection
+  - Pickup/dropoff location management
+  - Distance calculation between locations
+  - Booking history and management
+  - Cancel bookings with confirmation
+
+- **User Roles**
+
+  - **Customer**: Browse cars, make bookings, manage personal bookings
+  - **Admin**: Manage all cars, view all bookings, cancel bookings
+  - **Super Admin**: Create admin accounts, manage entire admin system
+
+- **Real-time Updates**
+
+  - WebSocket (Socket.IO) integration for live booking notifications
+  - Instant updates across multiple admin users
+
+- **Email Notifications**
+  - OTP delivery for email verification
+  - Booking confirmations (ready for implementation)
+
+## 🛠 Tech Stack
+
+### Backend
+
+- **Runtime**: Node.js v22.12.0
+- **Framework**: Express.js 4.x
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT, bcryptjs, Passport.js, Google OAuth 2.0
+- **Real-time**: Socket.IO
+- **Email**: Nodemailer
+- **Utilities**: dotenv, cors
+
+### Frontend
+
+- **Markup**: HTML5 with EJS templating
+- **Styling**: CSS3 with responsive design
+- **Client-side Logic**: Vanilla JavaScript (ES6+)
+- **HTTP Client**: Fetch API
+- **Icons**: Font Awesome 6.0
+
+### DevOps
+
+- **Development Server**: Nodemon
+- **Package Manager**: npm
+- **Version Control**: Git
+
+## 📦 Prerequisites
+
+- Node.js v14 or higher
+- npm or yarn
+- MongoDB (local or Atlas cloud database)
+- Google OAuth credentials (for Google sign-in)
+- Email service credentials (for OTP delivery)
+
+## 🚀 Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd carRental
+```
+
+### 2. Install Dependencies
+
+```bash
 npm install
 ```
-3) Create .env in the repo root:
+
+### 3. Create Environment File
+
+Create a `.env` file in the root directory:
+
 ```env
-MONGO_URI=your_mongo_connection_string
-JWT_SECRET=your_jwt_secret
-SESSION_SECRET=your_session_secret
+# Server Configuration
 PORT=5000
-GOOGLE_CLIENT_ID=optional_google_client_id
-GOOGLE_CLIENT_SECRET=optional_google_client_secret
-```
-4) Run the app:
-```powershell
-npm run dev   # nodemon
-# or
-npm start     # node server.js
-```
-Server listens on PORT (default 5000).
+NODE_ENV=development
 
-## Seeding Cars
-Populate a small catalogue with a reliable placeholder image:
-```powershell
-node seedCars.js
+# Database
+MONGO_URI=mongodb://localhost:27017/carRental
+# Or for MongoDB Atlas:
+# MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/carRental
+
+# Authentication
+JWT_SECRET=your_jwt_secret_key_here
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:5000/auth/google/callback
+
+# Email Service (Gmail example)
+EMAIL_SERVICE=gmail
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASSWORD=your_app_password
+EMAIL_FROM=noreply@carrental.com
 ```
 
-## Scripts
-- `npm run dev` – start with nodemon (auto-reload)
+### 4. Create Super Admin Account
+
+```bash
+node seedSuperAdmin.js
+```
+
+**Output:**
+
+```
+✅ Super Admin account created successfully!
+==========================================
+Email: [auto-generated during setup]
+Password: [auto-generated during setup]
+Role: superadmin
+==========================================
+⚠️  Keep these credentials secure and share only with authorized administrators.
+```
+
+The super admin credentials are generated by the seed script and will be displayed in your terminal. **Save them securely** and do not commit them to version control.
+
+## ⚙️ Configuration
+
+### MongoDB Connection
+
+- **Local**: `mongodb://localhost:27017/carRental`
+- **Atlas**: `mongodb+srv://username:password@cluster.mongodb.net/dbname?retryWrites=true&w=majority`
+
+### Google OAuth Setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project
+3. Enable Google+ API
+4. Create OAuth 2.0 credentials (Web application)
+5. Add authorized redirect URIs:
+   - `http://localhost:5000/auth/google/callback` (development)
+   - `https://yourdomain.com/auth/google/callback` (production)
+
+### Email Configuration
+
+For Gmail:
+
+1. Enable 2-factor authentication
+2. Generate an [App Password](https://myaccount.google.com/apppasswords)
+3. Use the app password in `.env`
+
+## 📁 Project Structure
+
+```
+carRental/
+├── models/                 # Database schemas
+│   ├── User.js            # User schema (customer, admin, superadmin)
+│   ├── Car.js             # Car inventory schema
+│   └── Booking.js         # Booking transactions schema
+│
+├── Routes/                # API and view routes
+│   ├── authRoutes.js      # Authentication endpoints
+│   ├── carRoutes.js       # Car management endpoints
+│   ├── bookingRoutes.js   # Booking endpoints
+│   ├── userRoutes.js      # User profile endpoints
+│   └── viewRoutes.js      # EJS view routes
+│
+├── middleware/            # Custom middleware
+│   ├── auth.js           # JWT authentication & role verification
+│   └── passport.js       # Passport.js strategy configuration
+│
+├── services/             # Business logic services
+│   └── emailService.js   # OTP generation and email delivery
+│
+├── views/               # EJS templates
+│   ├── layout.ejs       # Base layout template
+│   ├── index.ejs        # Homepage
+│   ├── login.ejs        # Login page
+│   ├── signup.ejs       # Registration page
+│   ├── verify-otp.ejs   # Email verification
+│   ├── cars.ejs         # Car listing and booking
+│   ├── bookings.ejs     # User bookings
+│   ├── admin.ejs        # Admin dashboard
+│   ├── superadmin.ejs   # Super admin dashboard
+│   └── editCar.ejs      # Car editing
+│
+├── public/              # Static assets
+│   ├── css/
+│   │   └── style.css    # Global styles
+│   └── js/
+│       ├── auth.js      # Auth & navigation logic
+│       └── main.js      # Utilities & Socket.IO
+│
+├── server.js            # Express app setup & server start
+├── seedSuperAdmin.js    # Super admin account creation script
+├── seedCars.js          # Car inventory seed script
+├── package.json         # Dependencies & scripts
+└── .env                 # Environment variables (gitignored)
+```
+
+## 🎯 Getting Started
+
+### 1. Start MongoDB
+
+```bash
+# If using local MongoDB
+mongod
+```
+
+### 2. Start the Server
+
+**Development (with auto-reload):**
+
+```bash
+npm start
+# Or with nodemon
+nodemon server.js
+```
+
+**Production:**
+
+```bash
+NODE_ENV=production node server.js
+```
+
+Server runs on: `http://localhost:5000`
+
+### 3. Access the Application
+
+- **Homepage**: http://localhost:5000
+- **Login**: http://localhost:5000/login
+- **Sign Up**: http://localhost:5000/signup
+- **Browse Cars**: http://localhost:5000/cars
+
+## 👥 User Roles & Permissions
+
+### Customer (user)
+
+- ✅ Browse available cars
+- ✅ Book cars with date selection
+- ✅ View personal booking history
+- ✅ Cancel own bookings
+- ✅ Update profile
+
+### Admin (admin)
+
+- ✅ All customer features
+- ✅ Add/edit/delete cars
+- ✅ View all bookings
+- ✅ Cancel any booking
+- ✅ Manage inventory
+- ❌ Cannot create other admins
+
+### Super Admin (superadmin)
+
+- ✅ All admin features
+- ✅ **Create new admin accounts**
+- ✅ View all admin accounts
+- ✅ Delete admin accounts
+- ✅ Manage entire admin system
+- ✅ Access Super Admin Dashboard (`/superadmin`)
+
+## 🔌 API Endpoints
+
+### Authentication
+
+```
+POST   /auth/signup              Register new customer account
+POST   /auth/verify-otp          Verify email with OTP
+POST   /auth/resend-otp          Resend OTP to email
+POST   /auth/login               Login (email & password)
+GET    /auth/google              Google OAuth sign-in
+POST   /auth/create-admin        Create admin account (super admin only)
+GET    /auth/admins              List all admins (super admin only)
+DELETE /auth/admin/:id           Delete admin account (super admin only)
+```
+
+### Cars
+
+```
+GET    /api/cars                 Get all available cars
+POST   /api/cars                 Create new car (admin only)
+GET    /api/cars/:id             Get car details
+PUT    /api/cars/:id             Update car (admin only)
+DELETE /api/cars/:id             Delete car (admin only)
+```
+
+### Bookings
+
+```
+POST   /api/bookings             Create new booking
+GET    /api/bookings/my-bookings Get user's bookings
+PUT    /api/bookings/cancel/:id  Cancel a booking
+GET    /api/bookings/all         Get all bookings (admin only)
+```
+
+### Views
+
+```
+GET    /                         Homepage
+GET    /login                    Login page
+GET    /signup                   Signup page
+GET    /cars                     Car listing
+GET    /bookings                 User bookings
+GET    /admin                    Admin dashboard (admin only)
+GET    /superadmin               Super admin dashboard (super admin only)
+```
+
+## 🦸 Super Admin Features
+
+### Creating Admin Accounts
+
+1. **Login** with super admin credentials (saved from seed script output)
+
+2. **Navigate** to Super Admin Dashboard: `/superadmin`
+
+3. **Fill Form** with new admin details:
+
+   - Full Name
+   - Email
+   - Password (min. 6 characters)
+
+4. **Click** "Create Admin Account"
+
+5. **Share** login credentials with the new admin securely
+
+### Managing Admin Accounts
+
+- **View All**: See all active admin accounts with creation dates
+- **Delete**: Remove admin account (requires confirmation)
+- **Fallback**: If super admin credentials lost, re-run `node seedSuperAdmin.js` to regenerate
+
+## 📊 Database Schema
+
+### User
+
+```javascript
+{
+  name: String,
+  email: String (unique),
+  password: String (hashed),
+  role: "superadmin" | "admin" | "user",
+  emailVerified: Boolean,
+  otp: String,
+  otpExpiry: Date,
+  googleId: String,
+  profilePhoto: String,
+  createdAt: Date
+}
+```
+
+### Car
+
+```javascript
+{
+  model: String,
+  type: "sedan" | "suv" | "hatchback",
+  pricePerDay: Number,
+  imageUrl: String,
+  isAvailable: Boolean,
+  createdAt: Date
+}
+```
+
+### Booking
+
+```javascript
+{
+  userId: ObjectId (ref: User),
+  customerName: String,           // Snapshot at booking time
+  customerEmail: String,          // Snapshot at booking time
+  carId: ObjectId (ref: Car),
+  startDate: Date,
+  endDate: Date,
+  status: "booked" | "cancelled",
+  pickupLocation: String,
+  dropoffLocation: String,
+  pickupLat: Number,
+  pickupLng: Number,
+  dropoffLat: Number,
+  dropoffLng: Number,
+  distanceKm: Number,
+  createdAt: Date
+}
+```
+
+## 🐛 Troubleshooting
+
+### Port Already in Use
+
+```bash
+# Kill process on port 5000
+# Windows:
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
+
+# Linux/Mac:
+lsof -i :5000
+kill -9 <PID>
+```
+
+### MongoDB Connection Error
+
+- Verify MongoDB is running: `mongod`
+- Check `MONGO_URI` in `.env`
+- For Atlas: Ensure IP whitelist includes your IP
+
+### Super Admin Not Found
+
+```bash
+node seedSuperAdmin.js
+```
+
+### Email Not Sending
+
+1. Enable Less Secure App Access (Gmail)
+2. Use App Password (Gmail with 2FA)
+3. Check `EMAIL_SERVICE`, `EMAIL_USER`, `EMAIL_PASSWORD` in `.env`
+
+### Token Expired
+
+- JWT tokens expire after 24 hours
+- Users will be auto-logged out
+- Login again to get a new token
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+### Coding Standards
+
+- Use ES6+ syntax
+- Follow existing code style
+- Add comments for complex logic
+- Test thoroughly before submitting PR
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Support
+
+For issues, questions, or suggestions:
+
+- Open an [GitHub Issue](https://github.com/yourusername/carRental/issues)
+- Contact the development team
+
+---
+
+**Made with ❤️ for seamless car rental management**
+
+**Last Updated**: December 15, 2025
+
 - `npm start` – start with node
 
 ## Folder Structure (what lives where)
+
 ```
 server.js               Express app entry, Mongo connection, Socket.IO
 package.json            Scripts and dependencies
@@ -75,6 +517,7 @@ seedCars.js             Seeds ~21 cars with placeholder images
 ```
 
 ## API and Pages
+
 - Auth (mounted at /auth): signup (OTP), verify-otp, resend-otp, login, Google OAuth callback in [Routes/authRoutes.js](Routes/authRoutes.js)
 - Users (mounted at /users): register in [Routes/userRoutes.js](Routes/userRoutes.js)
 - Cars (mounted at /api/cars): list (public), create/update/delete (admin) in [Routes/carRoutes.js](Routes/carRoutes.js)
@@ -82,6 +525,7 @@ seedCars.js             Seeds ~21 cars with placeholder images
 - Views (mounted at /): index, cars, bookings, admin, login, signup, verify-otp, edit-car in [Routes/viewRoutes.js](Routes/viewRoutes.js)
 
 ## Auth Flow
+
 - Email signup: `POST /auth/signup` stores user with OTP -> `POST /auth/verify-otp` finalizes and returns JWT.
 - Resend OTP: `POST /auth/resend-otp` for unverified users.
 - Login: `POST /auth/login` returns JWT; JWT goes in `Authorization: Bearer <token>` for protected calls.
@@ -89,28 +533,34 @@ seedCars.js             Seeds ~21 cars with placeholder images
 - Role guard: pass roles to middleware/auth.js (admin-only for car writes and booking list-all).
 
 ## Realtime Hooks
+
 Socket.IO is initialized in [server.js](server.js); routes emit `booking:created` and `booking:cancelled` events when io is available via `app.locals.io`.
 
 ## Images
+
 When no image is provided or loading fails, cars fall back to https://placehold.co/600x360?text=Car+Image (used in models and seeder; frontend also guards with onerror).
 
 ## Troubleshooting
+
 - Connection errors: confirm MONGO_URI and network access (Atlas IP allowlist, etc.).
 - Invalid token: ensure JWT_SECRET in .env matches the running process.
 - Google OAuth: set GOOGLE_CLIENT_ID/SECRET and restart; otherwise endpoints will respond with a 503 message.
 - Static assets missing: public/ must remain mounted; check references in views.
 
 ## Additional Docs
+
 - SETUP_GUIDE.md – environment and installation details
 - IMPLEMENTATION_GUIDE.md – implementation notes
 - TESTING_GUIDE.md / QUICK_TEST.md – lightweight test guidance
 
 ## Security & Secrets
+
 - Use `.env.example` as a template and keep your real `.env` untracked (see `.gitignore`).
 - If a secret is ever committed, GitHub Push Protection will block the push. Purge the secret from history using `git filter-repo` or BFG, then rotate the credential.
 - Example to remove `.env` from history (requires git-filter-repo):
-	- `git filter-repo --path .env --invert-paths`
-	- `git push --force`
+  - `git filter-repo --path .env --invert-paths`
+  - `git push --force`
 
 ## License
+
 ISC (see package.json).

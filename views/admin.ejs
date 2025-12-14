@@ -26,6 +26,9 @@
                 <li class="nav-item" id="admin-link" style="display: none;">
                     <a href="/admin" class="nav-link">Admin</a>
                 </li>
+                <li class="nav-item" id="superadmin-link" style="display: none;">
+                    <a href="/superadmin" class="nav-link">Super Admin</a>
+                </li>
                 <li class="nav-item" id="login-link">
                     <a href="/login" class="nav-link">Login</a>
                 </li>
@@ -140,7 +143,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!user || user.role !== 'admin') {
+    if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
         alert('Access denied. Admin only.');
         window.location.href = '/';
         return;
@@ -229,8 +232,8 @@ function displayAdminBookings(bookings) {
         <div class="admin-booking-card">
             <div class="booking-details">
                 <h3>${booking.carId?.model || 'Unknown Car'}</h3>
-                <p><strong>Customer:</strong> ${booking.userId?.name || 'Unknown User'}</p>
-                <p><strong>Email:</strong> ${booking.userId?.email || 'N/A'}</p>
+                <p><strong>Customer:</strong> ${booking.userId?.name || booking.customerName || 'Unknown User'}</p>
+                <p><strong>Email:</strong> ${booking.userId?.email || booking.customerEmail || 'N/A'}</p>
                 <p><strong>Start Date:</strong> ${new Date(booking.startDate).toLocaleDateString()}</p>
                 <p><strong>End Date:</strong> ${new Date(booking.endDate).toLocaleDateString()}</p>
                 <p><strong>Status:</strong> <span class="status-${booking.status}">${booking.status}</span></p>
