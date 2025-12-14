@@ -10,27 +10,32 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: "/auth/google/callback",
+        passReqToCallback: true,
       },
-      async (accessToken, refreshToken, profile, done) => {
+      async (req, accessToken, refreshToken, profile, done) => {
         try {
-          // Check if user exists with Google ID
+          // Determine whether account existed prior to this OAuth attempt
+          let existedBefore = false;
           let user = await User.findOne({ googleId: profile.id });
-
-          if (!user) {
-            // Check if user exists with email
-            user = await User.findOne({ email: profile.emails[0].value });
-
-            if (user) {
+          if (user) {
+            existedBefore = true;
+          } else {
+            // Check by email next
+            const emailVal = profile.emails[0]?.value;
+            const emailUser = await User.findOne({ email: emailVal });
+            if (emailUser) {
+              existedBefore = true;
               // Link Google ID to existing user
-              user.googleId = profile.id;
-              user.profilePhoto = profile.photos[0]?.value;
-              user.emailVerified = true; // Auto-verify for Google OAuth
-              await user.save();
+              emailUser.googleId = profile.id;
+              emailUser.profilePhoto = profile.photos[0]?.value;
+              emailUser.emailVerified = true; // Auto-verify for Google OAuth
+              await emailUser.save();
+              user = emailUser;
             } else {
-              // Create new user
+              // Create brand new user (did not exist before)
               user = new User({
                 name: profile.displayName,
-                email: profile.emails[0].value,
+                email: emailVal,
                 googleId: profile.id,
                 profilePhoto: profile.photos[0]?.value,
                 emailVerified: true, // Auto-verify for Google OAuth
@@ -39,6 +44,12 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               });
               await user.save();
             }
+          }
+
+          // Flag in session whether this Google account existed prior to this flow
+          if (req && req.session) {
+            req.session.oauthExistingUser = existedBefore; // true only if account existed prior to this OAuth
+            req.session.oauthEmail = profile.emails[0]?.value;
           }
 
           return done(null, user);

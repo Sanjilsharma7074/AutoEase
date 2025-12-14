@@ -176,6 +176,11 @@ router.get("/google", (req, res, next) => {
     passport._strategies.google
   );
   if (hasGoogleStrategy) {
+    // Capture intent (signup vs login) via query param in session
+    const flow = (req.query.flow || "login").toLowerCase();
+    if (req.session) {
+      req.session.oauthFlow = flow;
+    }
     return passport.authenticate("google", { scope: ["profile", "email"] })(
       req,
       res,
@@ -196,34 +201,55 @@ router.get("/google/callback", (req, res, next) => {
     passport._strategies.google
   );
   if (hasGoogleStrategy) {
-    return passport.authenticate("google", { failureRedirect: "/login" })(
-      req,
-      res,
-      async () => {
-        try {
-          const user = req.user;
-          // If Google account has no local password, force set-password flow
-          if (!user.password) {
-            return res.redirect("/auth/set-password");
-          }
-          const token = jwt.sign(
-            { id: user._id, role: user.role, email: user.email },
-            process.env.JWT_SECRET,
-            { expiresIn: "24h" }
-          );
-          res.redirect(
-            `/?token=${token}&user=${JSON.stringify({
-              id: user._id,
-              name: user.name,
-              email: user.email,
-              role: user.role,
-            })}`
-          );
-        } catch (err) {
-          res.redirect("/login?error=authentication_failed");
+    return passport.authenticate("google", {
+      failureRedirect: "/login",
+      session: false,
+    })(req, res, async () => {
+      try {
+        const user = req.user;
+        const flow = (req.session?.oauthFlow || "login").toLowerCase();
+        const existed = !!req.session?.oauthExistingUser;
+        const email = req.session?.oauthEmail;
+
+        // Clear flags to avoid reuse
+        if (req.session) {
+          req.session.oauthFlow = null;
+          req.session.oauthExistingUser = null;
+          req.session.oauthEmail = null;
         }
+
+        // If user clicked signup with an already registered Google/email, redirect to login with message
+        if (flow === "signup" && existed) {
+          const query = `?error=already_registered${
+            email ? `&email=${encodeURIComponent(email)}` : ""
+          }`;
+          return res.redirect(`/login${query}`);
+        }
+        // Proceed to establish a login session only for allowed flows
+        await new Promise((resolve, reject) => {
+          req.login(user, (err) => (err ? reject(err) : resolve()));
+        });
+        // If Google account has no local password, force set-password flow
+        if (!user.password) {
+          return res.redirect("/auth/set-password");
+        }
+        const token = jwt.sign(
+          { id: user._id, role: user.role, email: user.email },
+          process.env.JWT_SECRET,
+          { expiresIn: "24h" }
+        );
+        res.redirect(
+          `/?token=${token}&user=${JSON.stringify({
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          })}`
+        );
+      } catch (err) {
+        res.redirect("/login?error=authentication_failed");
       }
-    );
+    });
   }
   return res.status(503).send("Google OAuth not configured");
 });
