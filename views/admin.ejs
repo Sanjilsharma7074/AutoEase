@@ -228,7 +228,19 @@ function displayAdminBookings(bookings) {
         return;
     }
     
-    container.innerHTML = bookings.map(booking => `
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    container.innerHTML = bookings.map(booking => {
+        const startDate = new Date(booking.startDate);
+        const endDate = new Date(booking.endDate);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(0, 0, 0, 0);
+        
+        // Check if booking is currently in progress (customer has the car)
+        const isInProgress = booking.status === 'booked' && today >= startDate && today <= endDate;
+        
+        return `
         <div class="admin-booking-card">
             <div class="booking-details">
                 <h3>${booking.carId?.model || 'Unknown Car'}</h3>
@@ -237,15 +249,19 @@ function displayAdminBookings(bookings) {
                 <p><strong>Start Date:</strong> ${new Date(booking.startDate).toLocaleDateString()}</p>
                 <p><strong>End Date:</strong> ${new Date(booking.endDate).toLocaleDateString()}</p>
                 <p><strong>Status:</strong> <span class="status-${booking.status}">${booking.status}</span></p>
+                ${isInProgress ? '<p style="color: #e74c3c; font-weight: bold;"><i class="fas fa-car"></i> Customer currently using this vehicle</p>' : ''}
             </div>
             <div class="booking-actions">
-                ${booking.status === 'booked' ? 
+                ${booking.status === 'booked' && !isInProgress ? 
                     `<button class="btn btn-danger btn-sm" onclick="cancelBookingAdmin('${booking._id}')">Cancel</button>` :
+                    isInProgress ?
+                    `<button class="btn btn-disabled btn-sm" disabled title="Cannot cancel while customer is using the car">In Progress</button>` :
                     ''
                 }
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function openAddCarModal() {

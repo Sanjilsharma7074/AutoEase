@@ -61,10 +61,6 @@
           <div class="filter-controls">
             <select id="typeFilter">
               <option value="">All Types</option>
-              <option value="sedan">Sedan</option>
-              <option value="suv">SUV</option>
-              <option value="hatchback">Hatchback</option>
-              <option value="luxury">Luxury</option>
             </select>
             <button class="btn btn-secondary" onclick="filterCars()">
               Filter by Type
@@ -138,6 +134,9 @@
         // Load cars on page load
         document.addEventListener("DOMContentLoaded", function () {
           loadCars();
+
+          // Populate type filter options from server
+          loadTypes();
 
           // Set minimum date for date inputs to today
           const today = new Date().toISOString().split("T")[0];
@@ -252,15 +251,36 @@
           });
         }
 
+        async function loadTypes() {
+          try {
+            const res = await fetch("/api/cars/types");
+            const types = await res.json();
+            const select = document.getElementById("typeFilter");
+
+            // Preserve the first "All Types" option, then add fetched types
+            // Clear any existing non-default options
+            while (select.options.length > 1) {
+              select.remove(1);
+            }
+
+            types.forEach((type) => {
+              const opt = document.createElement("option");
+              opt.value = type; // use exact type string
+              opt.textContent = type;
+              select.appendChild(opt);
+            });
+          } catch (err) {
+            console.error("Failed to load car types", err);
+          }
+        }
+
         function filterCars() {
           const typeFilter = document.getElementById("typeFilter").value;
 
           let filteredCars = allCars;
 
           if (typeFilter) {
-            filteredCars = allCars.filter(
-              (car) => car.type.toLowerCase() === typeFilter.toLowerCase()
-            );
+            filteredCars = allCars.filter((car) => car.type === typeFilter);
           }
 
           displayCars(filteredCars);

@@ -32,6 +32,18 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Get distinct car types for filters
+router.get("/types", async (req, res) => {
+  try {
+    const types = await Car.distinct("type");
+    // Sort alphabetically for nicer UX
+    const sorted = types.sort((a, b) => a.localeCompare(b));
+    res.json(sorted);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // Delete a car (admin only)
 router.delete("/:id", auth(["admin"]), async (req, res) => {
   try {
