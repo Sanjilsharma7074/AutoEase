@@ -4,6 +4,7 @@ const auth = require("../middleware/auth");
 const router = express.Router();
 const Car = require("../models/Car");
 const Booking = require("../models/Booking");
+const aiGenerator = require("../services/aiCarGenerator");
 
 // add a car(only admin can do this)
 router.post("/", auth(["admin"]), async (req, res) => {
@@ -73,4 +74,28 @@ router.put("/:carId", auth(["admin"]), async (req, res) => {
   }
 });
 
+// Get detailed AI-generated features, images and areas for a single car
+router.get('/:id/details', async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) return res.status(404).json({ message: 'Car not found' });
+
+    // If car isn't augmented yet, generate and persist augmentation
+    if (!car.features || car.features.length === 0) {
+      const aug = aiGenerator.generate(car.toObject());
+      car.fixedFields = aug.fixedFields;
+      car.features = aug.features;
+      car.description = aug.description;
+      car.areas = aug.areas;
+      car.images = aug.images;
+      await car.save();
+    }
+
+    res.json(car);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 module.exports = router;
+

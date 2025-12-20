@@ -3,18 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Car Rental Service - Cars</title>
+    <meta name="theme-color" content="#0b76ff" />
+    <title>AutoLease - Cars</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css" />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   </head>
   <body>
     <nav class="navbar">
       <div class="nav-container">
         <div class="nav-logo">
-          <a href="/"><i class="fas fa-car"></i> CarRental</a>
+          <a href="/"><i class="fas fa-car"></i> AutoLease</a>
         </div>
         <ul class="nav-menu">
           <li class="nav-item">
@@ -54,25 +53,73 @@
       <div class="container">
         <div class="page-header">
           <h1>Available Cars</h1>
-          <p>Choose from our wide selection of vehicles</p>
+          <p>Find your perfect ride — filtered to your needs.</p>
         </div>
 
-        <div class="filter-section">
-          <div class="filter-controls">
-            <select id="typeFilter">
-              <option value="">All Types</option>
-            </select>
-            <button class="btn btn-secondary" onclick="filterCars()">
-              Filter by Type
-            </button>
+        <div class="layout-grid">
+          <aside class="sidebar-filter">
+            <h3 style="margin-top:0">Filters</h3>
+            <div class="filter-section">
+              <div class="filter-controls">
+                <label><strong>Type</strong></label>
+                <select id="typeFilter">
+                  <option value="">All Types</option>
+                </select>
+
+                <label style="margin-top:12px"><strong>Price</strong></label>
+                <select id="priceFilter">
+                  <option value="">Any</option>
+                  <option value="0-50">$0 - $50</option>
+                  <option value="50-100">$50 - $100</option>
+                  <option value="100-99999">$100+</option>
+                </select>
+
+                <label style="margin-top:12px"><strong>Location</strong></label>
+                <input id="locationInput" type="text" placeholder="City or area" />
+                <div class="filter-row" style="margin-top:8px">
+                  <button class="btn-apply" onclick="applyLocationFilter()">Search</button>
+                  <button class="btn-reset" onclick="detectLocationAndFilter()">Use my location</button>
+                </div>
+
+                <label style="margin-top:12px"><strong>Nearby</strong></label>
+                <div class="filter-row">
+                  <input id="radiusKm" type="number" min="1" max="200" placeholder="km" />
+                  <select id="radiusUnit"><option value="km">km</option></select>
+                </div>
+
+                <div style="margin-top:16px;display:flex;gap:8px">
+                  <button class="btn-apply" onclick="applyRadiusAndFilters()">Apply</button>
+                  <button class="btn-reset" onclick="resetFilters()">Reset</button>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <section>
+              <div id="carsContainer" class="cards-grid">
+                <!-- Cars will be loaded here -->
+              </div>
+
+            <div id="loading" class="loading skeleton-cards">
+          <div class="skeleton-card">
+            <div class="skeleton-img skeleton"></div>
+            <div class="skeleton-line skeleton" style="width:60%"></div>
+            <div class="skeleton-line skeleton" style="width:40%"></div>
+            <div class="skeleton-line skeleton" style="width:80%"></div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-img skeleton"></div>
+            <div class="skeleton-line skeleton" style="width:50%"></div>
+            <div class="skeleton-line skeleton" style="width:30%"></div>
+            <div class="skeleton-line skeleton" style="width:70%"></div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-img skeleton"></div>
+            <div class="skeleton-line skeleton" style="width:65%"></div>
+            <div class="skeleton-line skeleton" style="width:45%"></div>
+            <div class="skeleton-line skeleton" style="width:85%"></div>
           </div>
         </div>
-
-        <div id="carsContainer" class="cars-grid">
-          <!-- Cars will be loaded here -->
-        </div>
-
-        <div id="loading" class="loading">Loading cars...</div>
       </div>
 
       <!-- Booking Modal -->
@@ -138,20 +185,20 @@
           // Populate type filter options from server
           loadTypes();
 
-          // Set minimum date for date inputs to today
+          // Guard date inputs (if present) and set minimums
           const today = new Date().toISOString().split("T")[0];
-          document.getElementById("filterStartDate").min = today;
-          document.getElementById("filterEndDate").min = today;
-
-          // Update end date minimum when start date changes
-          document
-            .getElementById("filterStartDate")
-            .addEventListener("change", function () {
+          const startEl = document.getElementById("filterStartDate");
+          const endEl = document.getElementById("filterEndDate");
+          if (startEl && endEl) {
+            startEl.min = today;
+            endEl.min = today;
+            startEl.addEventListener("change", function () {
               const startDate = this.value;
-              if (startDate) {
-                document.getElementById("filterEndDate").min = startDate;
+              if (startDate && endEl) {
+                endEl.min = startDate;
               }
             });
+          }
         });
 
         async function loadCars(startDate = "", endDate = "") {
@@ -173,8 +220,14 @@
         }
 
         async function checkAvailability() {
-          const startDate = document.getElementById("filterStartDate").value;
-          const endDate = document.getElementById("filterEndDate").value;
+          const startEl = document.getElementById("filterStartDate");
+          const endEl = document.getElementById("filterEndDate");
+          if(!startEl || !endEl){
+            alert('Date filters are not available');
+            return;
+          }
+          const startDate = startEl.value;
+          const endDate = endEl.value;
 
           if (!startDate || !endDate) {
             alert("Please select both start and end dates");
@@ -205,43 +258,40 @@
           }
 
           container.innerHTML = cars
-            .map(
-              (car) => `
-        <div class="car-card">
-            <div class="car-image">
-              <img src="${car.imageUrl || defaultImage}" alt="${
-                car.model
-              }" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0; background: #f5f5f5;" onerror="this.onerror=null;this.src='${defaultImage}';">
+            .map((car, idx) => {
+              const sampleImages = [
+                'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1400&q=80',
+                'https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1400&q=80',
+                'https://images.unsplash.com/photo-1542367597-0a3d7c8a8a8e?auto=format&fit=crop&w=1400&q=80',
+                'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=80',
+                'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&w=1400&q=80'
+              ];
+              const defaultImageForIdx = sampleImages[idx % sampleImages.length];
+              const imageSrc = car.imageUrl || defaultImageForIdx;
+              const desc = car.description ? `<p class="car-desc">${car.description}</p>` : '';
+              const badges = (car.features || []).slice(0,3).map(f => `<span class="badge">${f}</span>`).join(' ');
+              return `
+        <article class="card reveal" role="article" aria-label="${car.model}">
+          <img class="media" src="${imageSrc}" alt="${car.model}" onerror="this.onerror=null;this.src='${defaultImageForIdx}';">
+          <div class="card-body">
+            <h3>${car.model}</h3>
+            <div class="meta-row"><span class="car-type">${car.type}</span><strong class="car-price">$${car.pricePerDay}/day</strong></div>
+            ${desc}
+            <div class="badges">${badges}</div>
+            <div class="meta">
+              <div class="availability">${car.availability ? '<span class="badge">Available</span>' : '<span class="badge" style="background:rgba(231,76,60,0.08);color:#E74C3C">Unavailable</span>'}</div>
+              <div class="actions">
+                ${car.availability ? `<button class="btn-apply" onclick="openBookingModal('${car._id}', '${car.model}', ${car.pricePerDay})">Book</button>` : `<button class="btn-reset" disabled>Unavailable</button>`}
+                <button class="btn-reset" onclick="openDetailsModal('${car._id}')">Details</button>
+              </div>
             </div>
-            <div class="car-info">
-                <h3>${car.model}</h3>
-                <p class="car-type">${car.type}</p>
-                <p class="car-price">$${car.pricePerDay}/day</p>
-                <p class="car-status ${
-                  car.availability ? "available" : "unavailable"
-                }">
-                    ${car.availability ? "Available" : "Not Available"}
-                </p>
-                ${
-                  currentStartDate && currentEndDate && car.availability
-                    ? `<p class="availability-info">Available for ${formatDate(
-                        currentStartDate
-                      )} - ${formatDate(currentEndDate)}</p>`
-                    : ""
-                }
-            </div>
-            <div class="car-actions">
-                ${
-                  car.availability
-                    ? `<button class="btn btn-primary" onclick="openBookingModal('${car._id}', '${car.model}', ${car.pricePerDay})">Book Now</button>`
-                    : `<button class="btn btn-disabled" disabled>Not Available</button>`
-                }
-            </div>
-        </div>
-    `
-            )
-            .join("");
+          </div>
+        </article>`
+            })
+            .join('');
         }
+
+          // Add event delegation for Details buttons and details modal rendering
 
         function formatDate(dateString) {
           return new Date(dateString).toLocaleDateString("en-US", {
@@ -276,6 +326,8 @@
 
         function filterCars() {
           const typeFilter = document.getElementById("typeFilter").value;
+          const locationFilter = (document.getElementById('locationInput')?.value || '').trim();
+          const priceFilter = (document.getElementById('priceFilter')?.value || '').trim();
 
           let filteredCars = allCars;
 
@@ -283,7 +335,130 @@
             filteredCars = allCars.filter((car) => car.type === typeFilter);
           }
 
+          if(locationFilter){
+            const loc = locationFilter.toLowerCase();
+            filteredCars = filteredCars.filter(car=>{
+              if(!car.areas || car.areas.length===0) return false;
+              return car.areas.some(a=>{
+                const al = a.toLowerCase();
+                return al.includes(loc) || loc.includes(al) || loc.split(/[,\s]+/).some(tok=>al.includes(tok));
+              });
+            });
+          }
+
+          // price filter simple ranges
+          if(priceFilter){
+            const [min,max] = priceFilter.split('-').map(Number);
+            filteredCars = filteredCars.filter(c=>{
+              const p = Number(c.pricePerDay || 0);
+              return p >= min && p <= max;
+            });
+          }
+
           displayCars(filteredCars);
+        }
+
+        function applyLocationFilter(){
+          const val = document.getElementById('locationInput').value.trim();
+          if(!val) return alert('Enter a location');
+          filterCars();
+        }
+
+        async function detectLocationAndFilter(){
+          if(!navigator.geolocation) return alert('Geolocation not supported');
+          const loading = document.getElementById('loading');
+          loading.style.display = 'block';
+          navigator.geolocation.getCurrentPosition(async (pos)=>{
+            const lat = pos.coords.latitude; const lon = pos.coords.longitude;
+            try{
+              const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+              const r = await fetch(url,{headers:{Accept:'application/json'}});
+              const data = await r.json();
+              const place = (data.address && (data.address.city || data.address.town || data.address.suburb || data.address.county)) || data.display_name || '';
+              if(place){
+                document.getElementById('locationInput').value = place;
+                filterCars();
+              } else {
+                alert('Could not determine a named place for your location');
+              }
+            }catch(e){
+              alert('Reverse geocoding failed');
+            }finally{ loading.style.display = 'none'; }
+          }, (err)=>{ loading.style.display = 'none'; alert('Permission denied or unable to access location'); }, {timeout:10000});
+        }
+
+        // geocode with caching helper
+        async function geocodeCached(q){
+          const cache = JSON.parse(sessionStorage.getItem('geocodeCache')||'{}');
+          if(cache[q]) return cache[q];
+          try{
+            const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
+            const r = await fetch(url,{headers:{Accept:'application/json'}});
+            const arr = await r.json();
+            if(arr && arr.length){
+              const coord = {lat:parseFloat(arr[0].lat), lon:parseFloat(arr[0].lon)};
+              cache[q]=coord; sessionStorage.setItem('geocodeCache', JSON.stringify(cache));
+              return coord;
+            }
+          }catch(e){console.warn('geocode failed',q,e)}
+          return null;
+        }
+
+        function kmBetween(a,b){
+          const toRad = v=>v*Math.PI/180;
+          const R = 6371;
+          const dLat = toRad(b.lat-a.lat); const dLon = toRad(b.lon-a.lon);
+          const la = toRad(a.lat), lb = toRad(b.lat);
+          const sinDLat = Math.sin(dLat/2)*Math.sin(dLat/2);
+          const sinDLon = Math.sin(dLon/2)*Math.sin(dLon/2);
+          const c = 2*Math.atan2(Math.sqrt(sinDLat + Math.cos(la)*Math.cos(lb)*sinDLon), Math.sqrt(1 - (sinDLat + Math.cos(la)*Math.cos(lb)*sinDLon)));
+          return R*c;
+        }
+
+        async function applyRadiusAndFilters(){
+          const radius = Number(document.getElementById('radiusKm')?.value || 0);
+          if(!radius || radius <= 0) return filterCars();
+          // get user location
+          let userCoord = null;
+          try{
+            userCoord = await new Promise((res, rej)=>{
+              if(navigator.geolocation){
+                navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude, lon:p.coords.longitude}), err=>rej(err), {timeout:10000});
+              } else rej(new Error('No geolocation'));
+            });
+          }catch(e){
+            // try to geocode the locationInput
+            const loc = (document.getElementById('locationInput')?.value||'').trim();
+            if(!loc) return alert('Allow location or enter a place to filter by radius');
+            userCoord = await geocodeCached(loc);
+            if(!userCoord) return alert('Could not determine your location');
+          }
+
+          const typeFilter = document.getElementById('typeFilter').value;
+          const priceFilter = (document.getElementById('priceFilter')?.value || '').trim();
+          let filtered = allCars;
+          if(typeFilter) filtered = filtered.filter(c=>c.type===typeFilter);
+          if(priceFilter){ const [min,max]=priceFilter.split('-').map(Number); filtered = filtered.filter(c=>{const p=Number(c.pricePerDay||0); return p>=min && p<=max}); }
+
+          const out = [];
+          for(const car of filtered){
+            const areas = car.areas||[];
+            let matched=false;
+            for(const a of areas){
+              const coord = await geocodeCached(a);
+              if(coord){ const d = kmBetween(userCoord, coord); if(d <= radius){ matched=true; break; } }
+            }
+            if(matched) out.push(car);
+          }
+          displayCars(out);
+        }
+
+        function resetFilters(){
+          document.getElementById('typeFilter').value = '';
+          const pf = document.getElementById('priceFilter'); if(pf) pf.value = '';
+          const li = document.getElementById('locationInput'); if(li) li.value = '';
+          // reload original list
+          displayCars(allCars);
         }
 
         function openBookingModal(carId, carModel, pricePerDay) {
@@ -459,11 +634,204 @@
             }
           });
       </script>
+
+      <!-- Details Modal -->
+      <div id="detailsModal" class="modal" style="display:none;">
+        <div class="modal-content details-modal">
+          <span class="details-close" style="cursor:pointer;">&times;</span>
+          <h2 id="detailsTitle">Car Details</h2>
+          <div id="detailsBody">
+              <p id="detailsDescription"></p>
+              <div id="fixedFields"></div>
+              <ul id="featuresList"></ul>
+              <div id="areasList"></div>
+              <div id="imagesGallery" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px;"></div>
+              <div id="detailsMap" style="display:none;margin-top:12px;width:100%;height:320px;border-radius:10px;overflow:hidden"></div>
+              <div id="detailsMessage" style="margin-top:12px"></div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <button class="btn btn-primary btn-sm" onclick="checkCarNearMe()">Check Near Me</button>
+                <button class="btn btn-secondary btn-sm" onclick="copyAreas()">Copy service areas</button>
+              </div>
+            </div>
+        </div>
+      </div>
+
+      <script>
+        async function openDetailsModal(carId) {
+          try {
+            const res = await fetch(`/api/cars/${carId}/details`);
+            if (!res.ok) throw new Error('Failed to load details');
+            const car = await res.json();
+
+              // store current detailed car globally for "Check Near Me"
+              window.currentDetailedCar = car;
+
+              document.getElementById('detailsTitle').textContent = car.model || 'Car Details';
+              document.getElementById('detailsDescription').textContent = car.description || '';
+
+            // fixed fields
+            const fixed = document.getElementById('fixedFields');
+            fixed.innerHTML = '';
+            if (car.fixedFields) {
+              const rows = Object.entries(car.fixedFields).map(([k,v]) => `<div><strong>${k}:</strong> ${v}</div>`).join('');
+              fixed.innerHTML = rows;
+            }
+
+            // features
+            const fl = document.getElementById('featuresList');
+            fl.innerHTML = '';
+            if (car.features && car.features.length) {
+              car.features.forEach(f => {
+                const li = document.createElement('li');
+                li.textContent = f;
+                fl.appendChild(li);
+              });
+            }
+
+            // areas
+            const areas = document.getElementById('areasList');
+            areas.innerHTML = '';
+            if (car.areas && car.areas.length) {
+              areas.innerHTML = '<strong>Service Areas:</strong> ' + car.areas.join(', ');
+            }
+
+            // images (grouped by position)
+            const gallery = document.getElementById('imagesGallery');
+            gallery.innerHTML = '';
+            if (car.images && car.images.length) {
+              car.images.forEach(group => {
+                (group.urls || []).forEach(url => {
+                  const img = document.createElement('img');
+                  img.src = url;
+                  img.alt = `${car.model} image`;
+                  img.style.width = '100%';
+                  img.style.height = '150px';
+                  img.style.objectFit = 'cover';
+                  img.style.borderRadius = '6px';
+                  gallery.appendChild(img);
+                });
+              });
+            }
+            document.getElementById('detailsMessage').innerHTML = '';
+            document.getElementById('detailsMessage').innerHTML = '';
+            // initialize a small map showing service areas (geocode on demand)
+            const mapHolder = document.getElementById('detailsMap');
+            mapHolder.style.display = 'none';
+            if (typeof L !== 'undefined' && car.areas && car.areas.length) {
+              mapHolder.style.display = 'block';
+              // clear previous map if present
+              if (window.detailsMap) { window.detailsMap.remove(); window.detailsMap = null; }
+              // create map
+              const mapEl = document.createElement('div');
+              mapEl.style.width = '100%'; mapEl.style.height = '320px';
+              mapEl.id = 'detailsMapInner';
+              mapHolder.innerHTML = '';
+              mapHolder.appendChild(mapEl);
+              window.detailsMap = L.map('detailsMapInner', { scrollWheelZoom:false }).setView([20,0], 2);
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(window.detailsMap);
+              const group = L.featureGroup().addTo(window.detailsMap);
+              // helper: geocode area name with caching
+              const geocodeCache = JSON.parse(sessionStorage.getItem('geocodeCache')||'{}');
+              for (let a of car.areas){
+                try{
+                  let coord = geocodeCache[a];
+                  if(!coord){
+                    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(a)}`;
+                    const r = await fetch(url,{headers:{Accept:'application/json'}});
+                    const arr = await r.json();
+                    if(arr && arr.length){ coord = {lat:parseFloat(arr[0].lat), lon:parseFloat(arr[0].lon)}; geocodeCache[a]=coord; sessionStorage.setItem('geocodeCache', JSON.stringify(geocodeCache)); }
+                  }
+                  if(coord){
+                    const m = L.marker([coord.lat, coord.lon]).addTo(group).bindPopup(`<strong>${a}</strong>`);
+                  }
+                }catch(e){console.warn('Area geocode failed',a,e)}
+              }
+              if(group.getLayers().length) window.detailsMap.fitBounds(group.getBounds().pad(0.6));
+            }
+
+            document.getElementById('detailsModal').style.display = 'block';
+          } catch (err) {
+            console.error(err);
+            alert('Failed to load car details');
+          }
+        }
+
+        function copyAreas(){
+          const car = window.currentDetailedCar;
+          if(!car || !car.areas) return alert('No areas available');
+          const text = car.areas.join(', ');
+          navigator.clipboard?.writeText(text).then(()=>{
+            const m = document.getElementById('detailsMessage');
+            m.textContent = 'Service areas copied to clipboard';
+            m.style.color = 'var(--color-primary)';
+            setTimeout(()=> m.textContent = '',3000);
+          });
+        }
+
+        async function checkCarNearMe(){
+          const car = window.currentDetailedCar;
+          const message = document.getElementById('detailsMessage');
+          if(!car) return;
+          if(!navigator.geolocation){
+            message.textContent = 'Geolocation not supported by your browser';
+            message.style.color = 'var(--color-danger)';
+            return;
+          }
+          message.textContent = 'Detecting your location...';
+          try{
+            navigator.geolocation.getCurrentPosition(async (pos)=>{
+              const lat = pos.coords.latitude;
+              const lon = pos.coords.longitude;
+              try{
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+                const r = await fetch(url, {headers:{Accept:'application/json'}});
+                const data = await r.json();
+                const place = (data.address && (data.address.city || data.address.town || data.address.suburb || data.address.county)) || data.display_name || '';
+                if(!place){
+                  message.textContent = 'Could not determine nearest place name';
+                  message.style.color = 'var(--color-danger)';
+                  return;
+                }
+                const locationLower = place.toLowerCase();
+                const match = (car.areas||[]).find(a=>{
+                  const al = a.toLowerCase();
+                  return al.includes(locationLower) || locationLower.includes(al) || locationLower.split(/[,\s]+/).some(tok=>al.includes(tok));
+                });
+                if(match){
+                  message.textContent = `Good news — this car serves your area (${match}).`;
+                  message.style.color = 'var(--color-success)';
+                } else {
+                  message.textContent = `This car does not list your area (${place}). Available areas: ${ (car.areas||[]).join(', ') }`;
+                  message.style.color = 'var(--color-danger)';
+                }
+              }catch(e){
+                message.textContent = 'Reverse geocoding failed';
+                message.style.color = 'var(--color-danger)';
+              }
+            }, (err)=>{
+              message.textContent = 'Permission denied or unable to get location';
+              message.style.color = 'var(--color-danger)';
+            }, {timeout:10000});
+          }catch(e){
+            message.textContent = 'Error while detecting location';
+            message.style.color = 'var(--color-danger)';
+          }
+        }
+
+        document.querySelector('.details-close').onclick = function() {
+          document.getElementById('detailsModal').style.display = 'none';
+        };
+
+        window.addEventListener('click', function(ev) {
+          const modal = document.getElementById('detailsModal');
+          if (ev.target === modal) modal.style.display = 'none';
+        });
+      </script>
     </main>
 
     <footer class="footer">
       <div class="footer-container">
-        <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
+        <p>&copy; 2025 AutoLease. All rights reserved.</p>
       </div>
     </footer>
 

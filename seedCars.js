@@ -1,6 +1,7 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 const Car = require("./models/Car");
+const ai = require("./services/aiCarGenerator");
 
 // Minimal car database with reduced size
 const defaultImage = "https://placehold.co/600x360?text=Car+Image"; // Default car image
@@ -182,7 +183,10 @@ async function seedDatabase() {
     await Car.deleteMany({});
     console.log("🗑️  Cleared existing cars");
 
-    const result = await Car.insertMany(cars);
+    // Augment each car with AI-generated features, description, areas, and images
+    const augmented = cars.map((c) => Object.assign({}, c, ai.generate(c)));
+
+    const result = await Car.insertMany(augmented);
     console.log(`✅ Successfully added ${result.length} cars to the database!`);
 
     const types = [...new Set(cars.map((car) => car.type))];

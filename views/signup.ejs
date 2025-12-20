@@ -1,185 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Car Rental Service - Sign Up</title>
-    <link rel="stylesheet" href="/css/style.css" />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <nav class="navbar">
-      <div class="nav-container">
-        <div class="nav-logo">
-          <a href="/"><i class="fas fa-car"></i> CarRental</a>
-        </div>
-        <ul class="nav-menu">
-          <li class="nav-item">
-            <a href="/" class="nav-link">Home</a>
-          </li>
-          <li class="nav-item">
-            <a href="/cars" class="nav-link">Cars</a>
-          </li>
-          <li class="nav-item" id="bookings-link" style="display: none">
-            <a href="/bookings" class="nav-link">My Bookings</a>
-          </li>
-          <li class="nav-item" id="admin-link" style="display: none">
-            <a href="/admin" class="nav-link">Admin</a>
-          </li>
-          <li class="nav-item" id="superadmin-link" style="display: none">
-            <a href="/superadmin" class="nav-link">Super Admin</a>
-          </li>
-          <li class="nav-item" id="login-link">
-            <a href="/login" class="nav-link">Login</a>
-          </li>
-          <li class="nav-item" id="signup-link">
-            <a href="/signup" class="nav-link">Sign Up</a>
-          </li>
-          <li class="nav-item" id="logout-link" style="display: none">
-            <a href="#" class="nav-link" onclick="logout()">Logout</a>
-          </li>
-        </ul>
-        <div class="hamburger">
-          <span class="bar"></span>
-          <span class="bar"></span>
-          <span class="bar"></span>
-        </div>
-      </div>
-    </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Car Rental Service – Sign Up</title>
 
-    <main>
-      <div class="auth-container">
-        <div class="auth-form">
-          <h2>Create Your Account</h2>
-          <div id="message" class="message"></div>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+</head>
 
-          <!-- Google OAuth Button -->
-          <div
-            id="googleOAuthButton"
-            style="margin-bottom: 20px; display: block"
-          >
-            <a
-              href="/auth/google?flow=signup"
-              class="btn btn-google"
-              style="
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-                background-color: #ffffff;
-                color: #333;
-                border: 1px solid #ddd;
-                text-decoration: none;
-                width: 100%;
-                padding: 10px;
-              "
-            >
-              <i class="fab fa-google"></i> Sign up with Google
-            </a>
+<body>
+
+<!-- SAME HEADER SYSTEM AS LOGIN -->
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="/"><i class="fas fa-car"></i> CarRental</a>
+
+    <ul class="nav-menu">
+      <li><a class="nav-link" href="/">Home</a></li>
+      <li><a class="nav-link" href="/cars">Cars</a></li>
+      <li><a class="nav-link" href="/login">Login</a></li>
+      <li><a class="nav-link active" href="/signup">Sign Up</a></li>
+    </ul>
+
+    <div class="hamburger">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="auth-container">
+      <div class="auth-form">
+        <h2>Sign Up</h2>
+
+        <div id="message"></div>
+
+        <!-- Google Signup -->
+        <a href="/auth/google?flow=signup" class="btn btn-google">
+          <i class="fab fa-google"></i> Sign up with Google
+        </a>
+
+        <div class="or-divider">OR</div>
+
+        <form id="signupForm">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="name" required />
           </div>
 
-          <div
-            id="orDivider"
-            style="
-              text-align: center;
-              margin: 20px 0;
-              color: #666;
-              display: block;
-            "
-          >
-            <span>OR</span>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" required />
           </div>
 
-          <form id="signupForm">
-            <div class="form-group">
-              <label for="name">Full Name:</label>
-              <input type="text" id="name" name="name" required />
-            </div>
-            <div class="form-group">
-              <label for="email">Email:</label>
-              <input type="email" id="email" name="email" required />
-            </div>
-            <div class="form-group">
-              <label for="password">Password:</label>
-              <input type="password" id="password" name="password" required />
-            </div>
-            <button type="submit" class="btn btn-primary">Sign Up</button>
-          </form>
-          <p class="auth-link">
-            Already have an account? <a href="/login">Login here</a>
-          </p>
-        </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" required />
+          </div>
+
+          <button type="submit" class="btn btn-primary">Sign Up</button>
+        </form>
+
+        <p class="auth-link">
+          Already have an account? <a href="/login">Login here</a>
+        </p>
       </div>
-    </main>
+    </div>
+  </div>
+</main>
 
-    <footer class="footer">
-      <div class="footer-container">
-        <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
-      </div>
-    </footer>
+<footer class="site-footer">
+  <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
+</footer>
 
-    <script src="/js/auth.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/main.js"></script>
-    <script>
-      document
-        .getElementById("signupForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
+<script src="/js/auth.js"></script>
+<script src="/js/main.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 
-          const name = document.getElementById("name").value;
-          const email = document.getElementById("email").value;
-          const password = document.getElementById("password").value;
-          const role = "user"; // All signups are customers now
-          const messageDiv = document.getElementById("message");
+<script>
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-          // Block super admin email from signup
-          if (email.toLowerCase() === "sanjilsharma456@gmail.com") {
-            messageDiv.innerHTML =
-              '<div class="error">This email is reserved for the Super Administrator account. Please use the login page if you have credentials.</div>';
-            setTimeout(() => {
-              window.location.href = "/login";
-            }, 3000);
-            return;
-          }
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const role = "user";
+  const messageDiv = document.getElementById("message");
 
-          try {
-            const response = await fetch("/auth/signup", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ name, email, password, role }),
-            });
+  if (email.toLowerCase() === "sanjilsharma456@gmail.com") {
+    messageDiv.innerHTML =
+      '<div class="error">This email is reserved for the Super Administrator account.</div>';
+    setTimeout(() => location.href = "/login", 3000);
+    return;
+  }
 
-            const data = await response.json();
+  try {
+    const res = await fetch("/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password, role })
+    });
 
-            if (response.ok) {
-              messageDiv.innerHTML =
-                '<div class="success">OTP sent to your email! Please verify to complete signup.</div>';
-              // Redirect to OTP verification page
-              setTimeout(() => {
-                window.location.href = `/verify-otp?email=${encodeURIComponent(
-                  email
-                )}`;
-              }, 2000);
-            } else {
-              messageDiv.innerHTML = `<div class="error">${
-                data.message || "Signup failed"
-              }</div>`;
-            }
-          } catch (error) {
-            messageDiv.innerHTML =
-              '<div class="error">Network error. Please try again.</div>';
-          }
-        });
+    const data = await res.json();
 
-      // Optional: If you want to provide feedback when Google creds are missing,
-      // we can probe a lightweight status endpoint instead of hiding the button.
-      // The button remains visible to allow users to try Google login.
-    </script>
-  </body>
+    if (res.ok) {
+      messageDiv.innerHTML =
+        '<div class="success">OTP sent to your email. Redirecting...</div>';
+      setTimeout(() => {
+        location.href = `/verify-otp?email=${encodeURIComponent(email)}`;
+      }, 2000);
+    } else {
+      messageDiv.innerHTML = `<div class="error">${data.message}</div>`;
+    }
+  } catch {
+    messageDiv.innerHTML =
+      '<div class="error">Network error. Please try again.</div>';
+  }
+});
+</script>
+
+</body>
 </html>

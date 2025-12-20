@@ -5,7 +5,7 @@ require("dotenv").config();
 async function checkSuperAdmin() {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    const user = await User.findOne({ email: "sanjilsharma456@gmail.com" });
+    const user = await User.findOne({ email: "heenaghai53@gmail.com" });
 
     if (!user) {
       console.log("❌ Super admin user NOT found in database");

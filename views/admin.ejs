@@ -11,147 +11,113 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <a href="/"><i class="fas fa-car"></i> CarRental</a>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="/" class="nav-link">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/cars" class="nav-link">Cars</a>
-                </li>
-                <li class="nav-item" id="bookings-link" style="display: none;">
-                    <a href="/bookings" class="nav-link">My Bookings</a>
-                </li>
-                <li class="nav-item" id="admin-link" style="display: none;">
-                    <a href="/admin" class="nav-link">Admin</a>
-                </li>
-                <li class="nav-item" id="superadmin-link" style="display: none;">
-                    <a href="/superadmin" class="nav-link">Super Admin</a>
-                </li>
-                <li class="nav-item" id="login-link">
-                    <a href="/login" class="nav-link">Login</a>
-                </li>
-                <li class="nav-item" id="signup-link">
-                    <a href="/signup" class="nav-link">Sign Up</a>
-                </li>
-                <li class="nav-item" id="logout-link" style="display: none;">
-                    <a href="#" class="nav-link" onclick="logout()">Logout</a>
-                </li>
-            </ul>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </div>
-    </nav>
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                    <title>AutoLease - Admin</title>
+                    <link rel="stylesheet" href="/css/style.css" />
+                    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+                </head>
+                <body>
+                    <nav class="navbar">
+                        <div class="nav-container">
+                            <div class="nav-logo"><a href="/"><i class="fas fa-car"></i> AutoLease</a></div>
+                            <ul class="nav-menu">
+                                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/cars">Cars</a></li>
+                                <li class="nav-item" id="bookings-link" style="display:none"><a class="nav-link" href="/bookings">My Bookings</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/signup">Sign Up</a></li>
+                            </ul>
+                            <div class="hamburger" aria-hidden="true"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+                        </div>
+                    </nav>
 
-    <main>
-        <div class="container">
-            <div class="page-header">
-                <h1>Admin Dashboard</h1>
-                <p>Manage cars and bookings</p>
-            </div>
-            
-            <div class="admin-tabs">
-                <button class="tab-button active" onclick="openTab(event, 'cars-tab')">Manage Cars</button>
-                <button class="tab-button" onclick="openTab(event, 'bookings-tab')">All Bookings</button>
-            </div>
-    
-    <!-- Cars Management Tab -->
-    <div id="cars-tab" class="tab-content active">
-        <div class="section-header">
-            <h2>Car Management</h2>
-            <button class="btn btn-primary" onclick="openAddCarModal()">Add New Car</button>
-        </div>
-        
-        <div id="adminCarsContainer" class="admin-cars-grid">
-            <!-- Cars will be loaded here -->
-        </div>
-    </div>
-    
-    <!-- Bookings Management Tab -->
-    <div id="bookings-tab" class="tab-content">
-        <div class="section-header">
-            <h2>All Bookings</h2>
-        </div>
-        
-        <div id="adminBookingsContainer">
-            <!-- Bookings will be loaded here -->
-        </div>
-    </div>
-</div>
+                    <main class="container" style="padding-top:36px">
+                        <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                            <h2>Admin Dashboard</h2>
+                            <div>
+                                <button class="tab-button active" onclick="openTab(event,'cars-tab')">Manage Cars</button>
+                                <button class="tab-button" onclick="openTab(event,'bookings-tab')">All Bookings</button>
+                            </div>
+                        </div>
 
-<!-- Add Car Modal -->
-<div id="addCarModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Add New Car</h2>
-        <div id="addCarMessage" class="message"></div>
-        <form id="addCarForm">
-            <div class="form-group">
-                <label for="model">Car Model:</label>
-                <input type="text" id="model" name="model" required>
-            </div>
-            <div class="form-group">
-                <label for="type">Car Type:</label>
-                <select id="type" name="type" required>
-                    <option value="">Select Type</option>
-                    <option value="sedan">Sedan</option>
-                    <option value="suv">SUV</option>
-                    <option value="hatchback">Hatchback</option>
-                    <option value="luxury">Luxury</option>
-                    <option value="coupe">Coupe</option>
-                    <option value="convertible">Convertible</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="pricePerDay">Price Per Day ($):</label>
-                <input type="number" id="pricePerDay" name="pricePerDay" min="1" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="imageUrl">Car Image URL:</label>
-                <input type="url" id="imageUrl" name="imageUrl" placeholder="Enter image URL">
-                <div style="margin-top: 10px;">
-                    <small>Sample images (click to use):</small>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;">
-                        <img src="https://images.unsplash.com/photo-1549924231-f129b911e442?w=100&h=60&fit=crop" 
-                             onclick="document.getElementById('imageUrl').value=this.src.replace('w=100&h=60', 'w=400&h=250')" 
-                             style="cursor: pointer; border-radius: 3px; width: 60px; height: 40px; object-fit: cover;" 
-                             title="Luxury Sedan">
-                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=100&h=60&fit=crop" 
-                             onclick="document.getElementById('imageUrl').value=this.src.replace('w=100&h=60', 'w=400&h=250')" 
-                             style="cursor: pointer; border-radius: 3px; width: 60px; height: 40px; object-fit: cover;" 
-                             title="SUV">
-                        <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=100&h=60&fit=crop" 
-                             onclick="document.getElementById('imageUrl').value=this.src.replace('w=100&h=60', 'w=400&h=250')" 
-                             style="cursor: pointer; border-radius: 3px; width: 60px; height: 40px; object-fit: cover;" 
-                             title="Hatchback">
-                        <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=100&h=60&fit=crop" 
-                             onclick="document.getElementById('imageUrl').value=this.src.replace('w=100&h=60', 'w=400&h=250')" 
-                             style="cursor: pointer; border-radius: 3px; width: 60px; height: 40px; object-fit: cover;" 
-                             title="Sports Car">
+                        <div id="cars-tab" class="tab-content active">
+                            <div class="section-header">
+                                <h3>Car Management</h3>
+                                <button class="btn btn-primary" onclick="openAddCarModal()">Add New Car</button>
+                            </div>
+                            <div id="adminCarsContainer" class="admin-cars-grid"></div>
+                        </div>
+
+                        <div id="bookings-tab" class="tab-content">
+                            <div class="section-header"><h3>All Bookings</h3></div>
+                            <div id="adminBookingsContainer"></div>
+                        </div>
+                    </main>
+
+                    <!-- Add Car Modal -->
+                    <div id="addCarModal" class="modal">
+                        <div class="modal-content">
+                            <span class="close">&times;</span>
+                            <h2>Add New Car</h2>
+                            <div id="addCarMessage" class="message"></div>
+                            <form id="addCarForm">
+                                <div class="form-group">
+                                    <label for="model">Car Model:</label>
+                                    <input type="text" id="model" name="model" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="type">Car Type:</label>
+                                    <select id="type" name="type" required>
+                                        <option value="">Select Type</option>
+                                        <option value="sedan">Sedan</option>
+                                        <option value="suv">SUV</option>
+                                        <option value="hatchback">Hatchback</option>
+                                        <option value="luxury">Luxury</option>
+                                        <option value="coupe">Coupe</option>
+                                        <option value="convertible">Convertible</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pricePerDay">Price Per Day ($):</label>
+                                    <input type="number" id="pricePerDay" name="pricePerDay" min="1" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="imageUrl">Car Image URL:</label>
+                                    <input type="url" id="imageUrl" name="imageUrl" placeholder="Enter image URL">
+                                    <div style="margin-top:10px;">
+                                        <small>Sample images (click to use):</small>
+                                        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+                                            <img src="https://images.unsplash.com/photo-1549924231-f129b911e442?q=80&w=400&auto=format&fit=crop" onclick="document.getElementById('imageUrl').value=this.src" style="cursor:pointer;border-radius:3px;width:60px;height:40px;object-fit:cover">
+                                            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=400&auto=format&fit=crop" onclick="document.getElementById('imageUrl').value=this.src" style="cursor:pointer;border-radius:3px;width:60px;height:40px;object-fit:cover">
+                                            <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=400&auto=format&fit=crop" onclick="document.getElementById('imageUrl').value=this.src" style="cursor:pointer;border-radius:3px;width:60px;height:40px;object-fit:cover">
+                                            <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=400&auto=format&fit=crop" onclick="document.getElementById('imageUrl').value=this.src" style="cursor:pointer;border-radius:3px;width:60px;height:40px;object-fit:cover">
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add Car</button>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Add Car</button>
-        </form>
-    </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
-        alert('Access denied. Admin only.');
-        window.location.href = '/';
-        return;
-    }
-    
-    loadAdminCars();
-    loadAdminBookings();
-});
+                    <footer class="site-footer">&copy; 2025 AutoLease</footer>
+
+                    <script src="/js/main.js"></script>
+                    <script>
+                        function openTab(e, id){
+                            document.querySelectorAll('.tab-button').forEach(b=>b.classList.remove('active'));
+                            e.currentTarget.classList.add('active');
+                            document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+                            document.getElementById(id).classList.add('active');
+                        }
+                        function openAddCarModal(){ document.getElementById('addCarModal').style.display='block'; }
+                        document.addEventListener('click', function(ev){ if(ev.target.matches('.close')) document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); });
+                    </script>
+                </body>
+                </html>
 
 function openTab(evt, tabName) {
     var i, tabcontent, tablinks;

@@ -1,233 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Verify Email - Car Rental Service</title>
-    <link rel="stylesheet" href="/css/style.css" />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      rel="stylesheet"
-    />
-    <style>
-      .otp-container {
-        max-width: 500px;
-        margin: 50px auto;
-        padding: 30px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-      .otp-input {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin: 20px 0;
-      }
-      .otp-digit {
-        width: 50px;
-        height: 50px;
-        font-size: 24px;
-        text-align: center;
-        border: 2px solid #007bff;
-        border-radius: 5px;
-      }
-      .timer {
-        text-align: center;
-        color: #dc3545;
-        font-weight: bold;
-        margin: 15px 0;
-      }
-      .resend-btn {
-        display: block;
-        margin: 20px auto;
-        text-align: center;
-      }
-      .resend-btn button {
-        background-color: #6c757d;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-      .resend-btn button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    </style>
-  </head>
-  <body>
-    <nav class="navbar">
-      <div class="nav-container">
-        <div class="nav-logo">
-          <a href="/"><i class="fas fa-car"></i> CarRental</a>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b76ff" />
+  <title>Verify Email - Car Rental Service</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    .otp-container {
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 30px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .otp-input {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .otp-digit {
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      text-align: center;
+      border: 2px solid #007bff;
+      border-radius: 5px;
+    }
+    .timer {
+      text-align: center;
+      color: #dc3545;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+    .resend-btn {
+      display: block;
+      margin: 20px auto;
+      text-align: center;
+    }
+    .resend-btn button {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .resend-btn button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="/"><i class="fas fa-car"></i> CarRental</a>
       </div>
-    </nav>
+    </div>
+  </nav>
 
-    <main>
-      <div class="otp-container">
-        <h2>Verify Your Email</h2>
-        <p>We've sent a 6-digit OTP to your email address.</p>
-        <div id="message" class="message"></div>
+  <main>
+    <div class="otp-container">
+      <h2>Verify Your Email</h2>
+      <p>We've sent a 6-digit OTP to your email address.</p>
+      <div id="message" class="message"></div>
 
-        <form id="otpForm">
-          <div class="otp-input">
-            <input
-              type="text"
-              class="otp-digit"
-              maxlength="1"
-              placeholder="0"
-              required
-            />
-            <input
-              type="text"
-              class="otp-digit"
-              maxlength="1"
-              placeholder="0"
-              required
-            />
-            <input
-              type="text"
-              class="otp-digit"
-              maxlength="1"
-              placeholder="0"
-              required
-            />
-            <input
-              type="text"
-              class="otp-digit"
-              maxlength="1"
-              placeholder="0"
-              required
-            />
-            <input
-              type="text"
-              class="otp-digit"
-              maxlength="1"
-              placeholder="0"
-              required
-            />
-            <input
-              type="text"
-              class="otp-digit"
-              maxlength="1"
-              placeholder="0"
-              required
-            />
-          </div>
-
-          <div class="timer">Time remaining: <span id="timer">600</span>s</div>
-
-          <button type="submit" class="btn btn-primary">Verify OTP</button>
-        </form>
-
-        <div class="resend-btn">
-          <button id="resendBtn" type="button">Resend OTP</button>
+      <form id="otpForm">
+        <div class="otp-input">
+          <input type="text" class="otp-digit" maxlength="1" placeholder="0" required />
+          <input type="text" class="otp-digit" maxlength="1" placeholder="0" required />
+          <input type="text" class="otp-digit" maxlength="1" placeholder="0" required />
+          <input type="text" class="otp-digit" maxlength="1" placeholder="0" required />
+          <input type="text" class="otp-digit" maxlength="1" placeholder="0" required />
+          <input type="text" class="otp-digit" maxlength="1" placeholder="0" required />
         </div>
+
+        <div class="timer">Time remaining: <span id="timer">600</span>s</div>
+        <button type="submit" class="btn btn-primary">Verify OTP</button>
+      </form>
+
+      <div class="resend-btn">
+        <button id="resendBtn" type="button">Resend OTP</button>
       </div>
-    </main>
+    </div>
+  </main>
 
-    <script>
-      let email = new URLSearchParams(window.location.search).get("email");
-      let timeLeft = 600; // 10 minutes
+  <script>
+    const email = new URLSearchParams(window.location.search).get("email");
+    let timeLeft = 600; // 10 minutes
 
-      // Timer countdown
-      setInterval(() => {
-        timeLeft--;
-        document.getElementById("timer").textContent = timeLeft;
-        if (timeLeft === 0) {
-          document.getElementById("otpForm").style.display = "none";
-          document.getElementById("message").innerHTML =
-            '<p style="color: red;">OTP expired. Please request a new one.</p>';
-        }
-      }, 1000);
+    // Timer countdown
+    const timerInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById("timer").textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById("otpForm").style.display = "none";
+        showMessage("OTP expired. Please request a new one.", "error");
+      }
+    }, 1000);
 
-      // Auto-focus next input
-      const otpInputs = document.querySelectorAll(".otp-digit");
-      otpInputs.forEach((input, index) => {
-        input.addEventListener("input", (e) => {
-          if (e.target.value && index < otpInputs.length - 1) {
-            otpInputs[index + 1].focus();
-          }
-        });
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Backspace" && !e.target.value && index > 0) {
-            otpInputs[index - 1].focus();
-          }
-        });
+    // Auto-focus inputs
+    const otpInputs = document.querySelectorAll(".otp-digit");
+    otpInputs.forEach((input, index) => {
+      input.addEventListener("input", e => {
+        if (e.target.value && index < otpInputs.length - 1) otpInputs[index + 1].focus();
       });
+      input.addEventListener("keydown", e => {
+        if (e.key === "Backspace" && !e.target.value && index > 0) otpInputs[index - 1].focus();
+      });
+    });
 
-      // Handle OTP submission
-      document
-        .getElementById("otpForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const otp = Array.from(otpInputs)
-            .map((input) => input.value)
-            .join("");
+    function showMessage(msg, type) {
+      const messageDiv = document.getElementById("message");
+      messageDiv.textContent = msg;
+      messageDiv.className = `message ${type === "error" ? "error" : "success"}`;
+    }
 
-          if (otp.length !== 6) {
-            showMessage("Please enter all 6 digits", "error");
-            return;
-          }
+    // Submit OTP
+    document.getElementById("otpForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const otp = Array.from(otpInputs).map(i => i.value).join("");
+      if (otp.length !== 6) return showMessage("Please enter all 6 digits", "error");
 
-          try {
-            const response = await fetch("/auth/verify-otp", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email, otp }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-              localStorage.setItem("token", data.token);
-              localStorage.setItem("user", JSON.stringify(data.user));
-              showMessage(data.message, "success");
-              setTimeout(() => {
-                window.location.href = "/";
-              }, 2000);
-            } else {
-              showMessage(data.message, "error");
-            }
-          } catch (error) {
-            showMessage("An error occurred. Please try again.", "error");
-          }
+      try {
+        const res = await fetch("/auth/verify-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, otp })
         });
-
-      // Handle resend OTP
-      document
-        .getElementById("resendBtn")
-        .addEventListener("click", async () => {
-          try {
-            const response = await fetch("/auth/resend-otp", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-              showMessage("OTP resent to your email", "success");
-              timeLeft = 600;
-            } else {
-              showMessage(data.message, "error");
-            }
-          } catch (error) {
-            showMessage("An error occurred. Please try again.", "error");
-          }
-        });
-
-      function showMessage(msg, type) {
-        const messageDiv = document.getElementById("message");
-        messageDiv.textContent = msg;
-        messageDiv.className = `message ${
-          type === "error" ? "error" : "success"
-        }`;
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+          showMessage(data.message, "success");
+          setTimeout(() => window.location.href = "/", 2000);
+        } else {
+          showMessage(data.message, "error");
+        }
+      } catch {
+        showMessage("An error occurred. Please try again.", "error");
       }
-    </script>
-  </body>
+    });
+
+    // Resend OTP
+    document.getElementById("resendBtn").addEventListener("click", async () => {
+      try {
+        const res = await fetch("/auth/resend-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showMessage("OTP resent to your email", "success");
+          timeLeft = 600;
+        } else {
+          showMessage(data.message, "error");
+        }
+      } catch {
+        showMessage("An error occurred. Please try again.", "error");
+      }
+    });
+  </script>
+</body>
 </html>

@@ -17,6 +17,20 @@ if (hamburger && navMenu) {
   );
 }
 
+// Small UI helpers for new theme
+document.addEventListener('DOMContentLoaded', () => {
+  // Subtle entrance reveal for elements with .reveal
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.animationDelay = (i * 60) + 'ms';
+  });
+
+  // Simple smooth image loading: add .loaded when each card image finishes
+  document.querySelectorAll('.card .media, .car-image img').forEach(img=>{
+    if(img.complete) img.classList.add('loaded');
+    else img.addEventListener('load', ()=> img.classList.add('loaded'));
+  });
+});
+
 // Smooth scrolling for anchor links
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   anchor.addEventListener("click", function (e) {
@@ -54,8 +68,7 @@ function validateDates(startDate, endDate) {
   if (end <= start) {
     return { valid: false, message: "End date must be after start date" };
   }
-
-  }
+}
 
   document.addEventListener("DOMContentLoaded", function () {
     // Add click handlers for cards with hover effects
@@ -87,7 +100,48 @@ function validateDates(startDate, endDate) {
     dateInputs.forEach((input) => {
       input.min = today;
     });
+
+    // Hide skeleton loader when cars are rendered into #carsContainer
+    const carsContainer = document.getElementById('carsContainer');
+    const loadingEl = document.getElementById('loading');
+    if (carsContainer && loadingEl) {
+      const obs = new MutationObserver(() => {
+        if (carsContainer.children.length > 0) {
+          loadingEl.style.display = 'none';
+          obs.disconnect();
+        }
+      });
+      obs.observe(carsContainer, { childList: true, subtree: false });
+    }
+
+    // Close modals with Escape and restore focus
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal').forEach(m => {
+          if (m.style.display === 'block' || m.style.display === 'inline-block') {
+            m.style.display = 'none';
+          }
+        });
+      }
+    });
   });
+
+  // Monitor modal visibility and lock body scroll when any modal is open
+  (function(){
+    const modals = Array.from(document.querySelectorAll('.modal'));
+    if(!modals.length) return;
+    const check = ()=>{
+      const anyOpen = modals.some(m=>{ try{ return window.getComputedStyle(m).display !== 'none' }catch(e){return false} });
+      if(anyOpen) document.body.classList.add('modal-open'); else document.body.classList.remove('modal-open');
+    };
+    // initial check
+    check();
+    // observe style attribute changes on each modal
+    modals.forEach(m=>{
+      const obs = new MutationObserver(check);
+      obs.observe(m, { attributes: true, attributeFilter: ['style', 'class'] });
+    });
+  })();
 
 // Utility function to make API calls with authentication
 async function apiCall(url, options = {}) {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -45,17 +45,16 @@
                 <span class="bar"></span>
             </div>
         </div>
-    </nav>
-
-    <main>
-        <div class="container">
-            <div class="page-header">
-                <h1>My Bookings</h1>
-                <p>Manage your car rental bookings</p>
-            </div>
-            
-            <div id="bookingsContainer">
-                <!-- Bookings will be loaded here -->
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#0b76ff" />
+        <title>Bookings</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="/css/style.css" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    </head>
+              
             </div>
             
             <div id="loading" class="loading">Loading bookings...</div>
@@ -157,5 +156,59 @@ async function cancelBooking(bookingId) {
     <script src="/js/auth.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/main.js"></script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Bookings</title>
+
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+</head>
+
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-logo">
+      <a href="/"><i class="fas fa-car"></i> CarRental</a>
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
+      <li class="nav-item"><a href="/cars" class="nav-link">Cars</a></li>
+      <li class="nav-item"><a href="/bookings" class="nav-link">My Bookings</a></li>
+      <li class="nav-item"><a href="#" onclick="logout()" class="nav-link">Logout</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+  <div class="container">
+    <h1>My Bookings</h1>
+
+    <div id="loading" class="loading">Loading bookings...</div>
+    <div id="bookingsContainer"></div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-container">
+    <p>&copy; 2025 Car Rental Service</p>
+  </div>
+</footer>
+
+<script src="/js/auth.js"></script>
+<script src="/js/main.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- your existing booking JS stays exactly the same -->
+
 </body>
 </html>

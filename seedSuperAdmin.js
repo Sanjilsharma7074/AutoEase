@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const User = require("./models/User");
 require("dotenv").config();
 
-const SUPER_ADMIN_EMAIL = "sanjilsharma456@gmail.com";
+const SUPER_ADMIN_EMAIL = "heenaghai53@gmail.com";
 const SUPER_ADMIN_PASSWORD = "SuperAdmin@2025"; // Fixed password
 const SUPER_ADMIN_NAME = "Super Administrator";
 

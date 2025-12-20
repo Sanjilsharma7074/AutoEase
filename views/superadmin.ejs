@@ -1,341 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Car Rental Service - Super Admin Dashboard</title>
-    <link rel="stylesheet" href="/css/style.css" />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      rel="stylesheet"
-    />
-    <style>
-      .super-admin-badge {
-        display: inline-block;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: bold;
-        margin-left: 10px;
-      }
-
-      .admin-card {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 15px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .admin-info {
-        flex: 1;
-      }
-
-      .admin-info h3 {
-        margin: 0 0 5px 0;
-        color: #333;
-      }
-
-      .admin-info p {
-        margin: 0;
-        color: #666;
-        font-size: 14px;
-      }
-
-      .admin-actions {
-        display: flex;
-        gap: 10px;
-      }
-
-      .btn-danger {
-        background: #e74c3c;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-
-      .btn-danger:hover {
-        background: #c0392b;
-      }
-
-      .create-admin-section {
-        background: white;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 30px;
-      }
-
-      .admins-list-section {
-        background: white;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-
-      .section-title {
-        color: #333;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #667eea;
-      }
-
-      .empty-state {
-        text-align: center;
-        padding: 40px;
-        color: #999;
-      }
-
-      .empty-state i {
-        font-size: 48px;
-        margin-bottom: 15px;
-        color: #ddd;
-      }
-    </style>
-  </head>
-  <body>
-    <nav class="navbar">
-      <div class="nav-container">
-        <div class="nav-logo">
-          <a href="/"><i class="fas fa-car"></i> CarRental</a>
-        </div>
-        <ul class="nav-menu">
-          <li class="nav-item">
-            <a href="/" class="nav-link">Home</a>
-          </li>
-          <li class="nav-item">
-            <a href="/cars" class="nav-link">Cars</a>
-          </li>
-          <li class="nav-item" id="admin-link">
-            <a href="/admin" class="nav-link">Admin Panel</a>
-          </li>
-          <li class="nav-item">
-            <a href="/superadmin" class="nav-link" style="color: #667eea"
-              >Super Admin</a
-            >
-          </li>
-          <li class="nav-item" id="logout-link">
-            <a href="#" class="nav-link" onclick="logout()">Logout</a>
-          </li>
-        </ul>
-        <div class="hamburger">
-          <span class="bar"></span>
-          <span class="bar"></span>
-          <span class="bar"></span>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b76ff" />
+  <title>Car Rental Service - Super Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .super-admin-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .admin-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .admin-info h3 {
+      margin: 0 0 5px 0;
+      color: #333;
+    }
+    .admin-info p {
+      margin: 0;
+      color: #666;
+      font-size: 14px;
+    }
+    .admin-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn-danger:hover { background: #c0392b; }
+    .create-admin-section, .admins-list-section {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+    .section-title {
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+    .empty-state i { font-size: 48px; margin-bottom: 15px; color: #ddd; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="/"><i class="fas fa-car"></i> CarRental</a>
       </div>
-    </nav>
+      <ul class="nav-menu">
+        <li><a href="/" class="nav-link">Home</a></li>
+        <li><a href="/cars" class="nav-link">Cars</a></li>
+        <li><a href="/admin" class="nav-link">Admin Panel</a></li>
+        <li><a href="/superadmin" class="nav-link" style="color: #667eea">Super Admin</a></li>
+        <li><a href="#" class="nav-link" onclick="logout()">Logout</a></li>
+      </ul>
+      <div class="hamburger">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </div>
+    </div>
+  </nav>
 
-    <main>
-      <div class="container">
-        <div class="page-header">
-          <h1>
-            Super Admin Dashboard
-            <span class="super-admin-badge">SUPER ADMIN</span>
-          </h1>
-          <p>Manage administrator accounts and system settings</p>
-        </div>
-
-        <!-- Create Admin Account Section -->
-        <div class="create-admin-section">
-          <h2 class="section-title">
-            <i class="fas fa-user-plus"></i> Create New Admin Account
-          </h2>
-          <div id="createAdminMessage" class="message"></div>
-          <form id="createAdminForm">
-            <div class="form-group">
-              <label for="adminName">Full Name:</label>
-              <input type="text" id="adminName" name="name" required />
-            </div>
-            <div class="form-group">
-              <label for="adminEmail">Email:</label>
-              <input type="email" id="adminEmail" name="email" required />
-            </div>
-            <div class="form-group">
-              <label for="adminPassword">Password:</label>
-              <input
-                type="password"
-                id="adminPassword"
-                name="password"
-                required
-                minlength="6"
-              />
-              <small style="color: #666; font-size: 12px"
-                >Minimum 6 characters</small
-              >
-            </div>
-            <button type="submit" class="btn btn-primary">
-              <i class="fas fa-plus-circle"></i> Create Admin Account
-            </button>
-          </form>
-        </div>
-
-        <!-- Admin Accounts List Section -->
-        <div class="admins-list-section">
-          <h2 class="section-title">
-            <i class="fas fa-users-cog"></i> Existing Admin Accounts
-          </h2>
-          <div id="adminsList">
-            <!-- Admin accounts will be loaded here -->
+  <main>
+    <div class="container">
+      <!-- Create Admin Account Section -->
+      <div class="create-admin-section">
+        <h2 class="section-title"><i class="fas fa-user-plus"></i> Create New Admin Account</h2>
+        <div id="createAdminMessage" class="message"></div>
+        <form id="createAdminForm">
+          <div class="form-group">
+            <label for="adminName">Full Name:</label>
+            <input type="text" id="adminName" name="name" required />
           </div>
+          <div class="form-group">
+            <label for="adminEmail">Email:</label>
+            <input type="email" id="adminEmail" name="email" required />
+          </div>
+          <div class="form-group">
+            <label for="adminPassword">Password:</label>
+            <input type="password" id="adminPassword" name="password" required minlength="6" />
+            <small style="color: #666; font-size: 12px">Minimum 6 characters</small>
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Create Admin Account</button>
+        </form>
+      </div>
+
+      <!-- Admin Accounts List Section -->
+      <div class="admins-list-section">
+        <h2 class="section-title"><i class="fas fa-users-cog"></i> Existing Admin Accounts</h2>
+        <div id="adminsList">
+          <!-- Admin accounts will be loaded here -->
         </div>
       </div>
-    </main>
+    </div>
+  </main>
 
-    <footer class="footer">
-      <div class="footer-container">
-        <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
-      </div>
-    </footer>
+  <footer class="footer">
+    <div class="footer-container">
+      <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
+    </div>
+  </footer>
 
-    <script src="/js/auth.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/main.js"></script>
-    <script>
-      // Load existing admin accounts
-      async function loadAdmins() {
-        try {
-          const token = localStorage.getItem("token");
-          const response = await fetch("/auth/admins", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (response.ok) {
-            const admins = await response.json();
-            displayAdmins(admins);
-          } else {
-            document.getElementById("adminsList").innerHTML =
-              '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load admin accounts</p></div>';
-          }
-        } catch (error) {
-          console.error("Error loading admins:", error);
-          document.getElementById("adminsList").innerHTML =
-            '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Error loading admin accounts</p></div>';
-        }
-      }
-
-      function displayAdmins(admins) {
-        const adminsList = document.getElementById("adminsList");
-
-        if (admins.length === 0) {
-          adminsList.innerHTML =
-            '<div class="empty-state"><i class="fas fa-user-slash"></i><p>No admin accounts found. Create one above.</p></div>';
-          return;
-        }
-
-        adminsList.innerHTML = admins
-          .map(
-            (admin) => `
-                <div class="admin-card">
-                    <div class="admin-info">
-                        <h3><i class="fas fa-user-shield"></i> ${
-                          admin.name
-                        }</h3>
-                        <p><i class="fas fa-envelope"></i> ${admin.email}</p>
-                        <p><i class="fas fa-calendar"></i> Created: ${new Date(
-                          admin.createdAt
-                        ).toLocaleDateString()}</p>
-                    </div>
-                    <div class="admin-actions">
-                        <button class="btn-danger" onclick="deleteAdmin('${
-                          admin._id
-                        }', '${admin.name}')">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </div>
-                </div>
-            `
-          )
-          .join("");
-      }
-
-      // Create new admin account
-      document
-        .getElementById("createAdminForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          const messageDiv = document.getElementById("createAdminMessage");
-          const name = document.getElementById("adminName").value;
-          const email = document.getElementById("adminEmail").value;
-          const password = document.getElementById("adminPassword").value;
-
-          try {
-            const token = localStorage.getItem("token");
-            const response = await fetch("/auth/create-admin", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({ name, email, password }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-              messageDiv.innerHTML = `<div class="success">${data.message}</div>`;
-              document.getElementById("createAdminForm").reset();
-              loadAdmins(); // Reload the admin list
-              setTimeout(() => {
-                messageDiv.innerHTML = "";
-              }, 5000);
-            } else {
-              messageDiv.innerHTML = `<div class="error">${data.message}</div>`;
-            }
-          } catch (error) {
-            console.error("Error creating admin:", error);
-            messageDiv.innerHTML =
-              '<div class="error">Network error. Please try again.</div>';
-          }
+  <script src="/js/auth.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/main.js"></script>
+  <script>
+    async function loadAdmins() {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("/auth/admins", {
+          headers: { Authorization: `Bearer ${token}` }
         });
-
-      // Delete admin account
-      async function deleteAdmin(adminId, adminName) {
-        if (
-          !confirm(
-            `Are you sure you want to delete admin account: ${adminName}?\n\nThis action cannot be undone.`
-          )
-        ) {
-          return;
+        if (response.ok) {
+          const admins = await response.json();
+          displayAdmins(admins);
+        } else {
+          document.getElementById("adminsList").innerHTML =
+            '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load admin accounts</p></div>';
         }
-
-        try {
-          const token = localStorage.getItem("token");
-          const response = await fetch(`/auth/admin/${adminId}`, {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-            alert(data.message);
-            loadAdmins(); // Reload the admin list
-          } else {
-            alert("Error: " + data.message);
-          }
-        } catch (error) {
-          console.error("Error deleting admin:", error);
-          alert("Network error. Please try again.");
-        }
+      } catch (error) {
+        console.error("Error loading admins:", error);
+        document.getElementById("adminsList").innerHTML =
+          '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Error loading admin accounts</p></div>';
       }
+    }
 
-      // Load admins on page load
-      document.addEventListener("DOMContentLoaded", () => {
-        loadAdmins();
-      });
-    </script>
-  </body>
+    function displayAdmins(admins) {
+      const adminsList = document.getElementById("adminsList");
+      if (admins.length === 0) {
+        adminsList.innerHTML =
+          '<div class="empty-state"><i class="fas fa-user-slash"></i><p>No admin accounts found. Create one above.</p></div>';
+        return;
+      }
+      adminsList.innerHTML = admins.map(admin => `
+        <div class="admin-card">
+          <div class="admin-info">
+            <h3><i class="fas fa-user-shield"></i> ${admin.name}</h3>
+            <p><i class="fas fa-envelope"></i> ${admin.email}</p>
+            <p><i class="fas fa-calendar"></i> Created: ${new Date(admin.createdAt).toLocaleDateString()}</p>
+          </div>
+          <div class="admin-actions">
+            <button class="btn-danger" onclick="deleteAdmin('${admin._id}', '${admin.name}')"><i class="fas fa-trash"></i> Delete</button>
+          </div>
+        </div>`).join('');
+    }
+
+    document.getElementById("createAdminForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const messageDiv = document.getElementById("createAdminMessage");
+      const name = document.getElementById("adminName").value;
+      const email = document.getElementById("adminEmail").value;
+      const password = document.getElementById("adminPassword").value;
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("/auth/create-admin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ name, email, password })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          messageDiv.innerHTML = `<div class="success">${data.message}</div>`;
+          document.getElementById("createAdminForm").reset();
+          loadAdmins();
+          setTimeout(() => messageDiv.innerHTML = "", 5000);
+        } else { messageDiv.innerHTML = `<div class="error">${data.message}</div>`; }
+      } catch (error) {
+        console.error("Error creating admin:", error);
+        messageDiv.innerHTML = '<div class="error">Network error. Please try again.</div>';
+      }
+    });
+
+    async function deleteAdmin(adminId, adminName) {
+      if (!confirm(`Are you sure you want to delete admin account: ${adminName}?\nThis action cannot be undone.`)) return;
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`/auth/admin/${adminId}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+        const data = await response.json();
+        if (response.ok) {
+          alert(data.message);
+          loadAdmins();
+        } else { alert("Error: " + data.message); }
+      } catch (error) {
+        console.error("Error deleting admin:", error);
+        alert("Network error. Please try again.");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadAdmins);
+  </script>
+</body>
 </html>
