@@ -46,7 +46,7 @@ app.use("/api/cars", carRoutes);
 app.use("/api/bookings", bookingRoutes);
 
 mongoose
-  .connect(this, {
+  .connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 30000, // Wait 30 seconds before timing out
     socketTimeoutMS: 45000, // 45 second timeout for socket operations
     connectTimeoutMS: 30000, // 30 seconds to connect
