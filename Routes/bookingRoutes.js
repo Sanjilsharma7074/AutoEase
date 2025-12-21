@@ -80,21 +80,29 @@ router.post("/", auth(), async (req, res) => {
 // Cancel a booking
 router.put("/cancel/:bookingId", auth(), async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.bookingId);
+    const { bookingId } = req.params;
+    const isAdmin =
+      req.user.role === "admin" || req.user.role === "superadmin";
 
-    if (!booking) return res.status(404).json({ message: "Booking not found" });
+    // Scope lookup to owner unless elevated role
+    const booking = await Booking.findOne({
+      _id: bookingId,
+      ...(isAdmin ? {} : { userId: req.user.id }),
+    });
 
-    // Only booking owner or admin can cancel
-    if (
-      booking.userId.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
-      return res.status(403).json({ message: "Access denied" });
+    if (!booking) {
+      return res
+        .status(404)
+        .json({ message: "Booking not found or not owned by user" });
+    }
+
+    if (booking.status === "cancelled") {
+      return res.status(409).json({ message: "Booking already cancelled" });
     }
 
     booking.status = "cancelled";
     await booking.save();
-    // Emit websocket event for cancelled booking
+
     const io = req.app && req.app.locals && req.app.locals.io;
     if (io) io.emit("booking:cancelled", booking);
 

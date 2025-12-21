@@ -1,161 +1,382 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Rental Service - My Bookings</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoEase - My Bookings</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
     <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="/"><i class="fas fa-car"></i> CarRental</a>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="/" class="nav-link">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/cars" class="nav-link">Cars</a>
-                </li>
-                <li class="nav-item" id="bookings-link" style="display: none;">
-                    <a href="/bookings" class="nav-link">My Bookings</a>
-                </li>
-                <li class="nav-item" id="admin-link" style="display: none;">
-                    <a href="/admin" class="nav-link">Admin</a>
-                </li>
-                <li class="nav-item" id="superadmin-link" style="display: none;">
-                    <a href="/superadmin" class="nav-link">Super Admin</a>
-                </li>
-                <li class="nav-item" id="login-link">
-                    <a href="/login" class="nav-link">Login</a>
-                </li>
-                <li class="nav-item" id="signup-link">
-                    <a href="/signup" class="nav-link">Sign Up</a>
-                </li>
-                <li class="nav-item" id="logout-link" style="display: none;">
-                    <a href="#" class="nav-link" onclick="logout()">Logout</a>
-                </li>
-            </ul>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
+      <div class="nav-container">
+        <div class="nav-logo">
+          <a href="/"><i class="fas fa-car-side"></i> AutoEase</a>
         </div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="/cars" class="nav-link">Cars</a>
+          </li>
+          <li class="nav-item" id="bookings-link" style="display: none">
+            <a href="/bookings" class="nav-link">My Bookings</a>
+          </li>
+          <li class="nav-item" id="admin-link" style="display: none">
+            <a href="/admin" class="nav-link">Admin</a>
+          </li>
+          <li class="nav-item" id="superadmin-link" style="display: none">
+            <a href="/superadmin" class="nav-link">Super Admin</a>
+          </li>
+          <li class="nav-item" id="login-link">
+            <a href="/login" class="nav-link">Login</a>
+          </li>
+          <li class="nav-item" id="signup-link">
+            <a href="/signup" class="nav-link">Sign Up</a>
+          </li>
+          <li class="nav-item" id="logout-link" style="display: none">
+            <a href="#" class="nav-link" onclick="logout()">Logout</a>
+          </li>
+        </ul>
+        <div class="hamburger">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+      </div>
     </nav>
 
     <main>
-        <div class="container">
-            <div class="page-header">
-                <h1>My Bookings</h1>
-                <p>Manage your car rental bookings</p>
-            </div>
-            
-            <div id="bookingsContainer">
-                <!-- Bookings will be loaded here -->
-            </div>
-            
-            <div id="loading" class="loading">Loading bookings...</div>
+      <div class="container">
+        <!-- Hero -->
+        <section class="bookings-hero">
+          <div class="hero-inner">
+            <h1 class="bookings-title">
+              My Bookings <span class="title-underline"></span>
+            </h1>
+            <p class="bookings-subtitle">
+              Track, manage, and review every trip with a clear, elegant view.
+            </p>
+          </div>
+          <div class="hero-shape hero-shape-a"></div>
+          <div class="hero-shape hero-shape-b"></div>
+        </section>
+
+        <div id="bookingsContainer" class="bookings-grid"></div>
+        <div id="loading" class="loading">Loading bookings...</div>
+      </div>
+
+      <!-- Cancel confirmation modal -->
+      <div id="cancelModal" class="modal overlay-modal" aria-hidden="true">
+        <div class="modal-dialog">
+          <button class="modal-close" onclick="closeCancelModal()">
+            <i class="fas fa-times"></i>
+          </button>
+          <h3>Cancel Booking?</h3>
+          <p class="modal-text">
+            Are you sure you want to cancel this booking? This action cannot be
+            undone.
+          </p>
+          <div class="modal-actions">
+            <button class="btn-secondary" onclick="closeCancelModal()">
+              Keep Booking
+            </button>
+            <button class="btn-danger" id="confirmCancelBtn">
+              Yes, Cancel
+            </button>
+          </div>
         </div>
-</div>
+      </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    if (!isLoggedIn()) {
-        window.location.href = '/login';
-        return;
-    }
-    loadBookings();
-});
-
-async function loadBookings() {
-    const token = localStorage.getItem('token');
-    
-    try {
-        const response = await fetch('/api/bookings/my-bookings', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        
-        const bookings = await response.json();
-        displayBookings(bookings);
-        document.getElementById('loading').style.display = 'none';
-    } catch (error) {
-        document.getElementById('loading').innerHTML = 'Error loading bookings';
-    }
-}
-
-function displayBookings(bookings) {
-    const container = document.getElementById('bookingsContainer');
-    
-    if (bookings.length === 0) {
-        container.innerHTML = '<div class="no-bookings">You have no bookings yet</div>';
-        return;
-    }
-    
-    container.innerHTML = bookings.map(booking => `
-        <div class="booking-card">
-            <div class="booking-info">
-                <h3>${booking.carId?.model || 'Unknown Car'}</h3>
-                <p><strong>Type:</strong> ${booking.carId?.type || 'N/A'}</p>
-                <p><strong>Start Date:</strong> ${new Date(booking.startDate).toLocaleDateString()}</p>
-                <p><strong>End Date:</strong> ${new Date(booking.endDate).toLocaleDateString()}</p>
-                <p><strong>Status:</strong> <span class="status-${booking.status}">${booking.status}</span></p>
-                ${booking.pickupLocation ? `<p><strong>Pickup:</strong> ${booking.pickupLocation}</p>` : ''}
-                ${booking.dropoffLocation ? `<p><strong>Drop-off:</strong> ${booking.dropoffLocation}</p>` : ''}
-                ${booking.distanceKm ? `<p><strong>Distance:</strong> ${booking.distanceKm} km</p>` : ''}
-                ${booking.pickupLocation && booking.dropoffLocation ? `<p><strong>Map:</strong> <a href="https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(booking.pickupLocation)}&destination=${encodeURIComponent(booking.dropoffLocation)}" target="_blank">Open route in Google Maps</a></p>` : ''}
-            </div>
-            <div class="booking-actions">
-                ${booking.status === 'booked' ? 
-                    `<button class="btn btn-danger" onclick="cancelBooking('${booking._id}')">Cancel Booking</button>` :
-                    ''
-                }
-            </div>
+      <!-- Details modal -->
+      <div id="detailsModal" class="modal overlay-modal" aria-hidden="true">
+        <div class="modal-dialog large">
+          <button class="modal-close" onclick="closeDetailsModal()">
+            <i class="fas fa-times"></i>
+          </button>
+          <div id="detailsContent"></div>
         </div>
-    `).join('');
-}
-
-async function cancelBooking(bookingId) {
-    if (!confirm('Are you sure you want to cancel this booking?')) {
-        return;
-    }
-    
-    const token = localStorage.getItem('token');
-    
-    try {
-        const response = await fetch(`/api/bookings/cancel/${bookingId}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        
-        if (response.ok) {
-            alert('Booking cancelled successfully');
-            loadBookings(); // Reload bookings
-        } else {
-            alert('Failed to cancel booking');
-        }
-    } catch (error) {
-        alert('Error cancelling booking');
-    }
-}
-</script>
+      </div>
     </main>
 
-    <footer class="footer">
-        <div class="footer-container">
-            <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
+    <script>
+      let currentBookings = [];
+      let bookingToCancel = null;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!isLoggedIn()) {
+          window.location.href = "/login";
+          return;
+        }
+        loadBookings();
+      });
+
+      async function loadBookings() {
+        const token = localStorage.getItem("token");
+        try {
+          const response = await fetch("/api/bookings/my-bookings", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          currentBookings = await response.json();
+          displayBookings(currentBookings);
+          document.getElementById("loading").style.display = "none";
+        } catch (error) {
+          document.getElementById("loading").innerHTML =
+            "Error loading bookings";
+        }
+      }
+
+      function displayBookings(bookings) {
+        const container = document.getElementById("bookingsContainer");
+        const fallbackImg = "https://placehold.co/240x160?text=AutoEase";
+
+        if (!bookings || bookings.length === 0) {
+          container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-illustration">🚗</div>
+                    <h3>No bookings yet</h3>
+                    <p>Ready for your next drive? Browse our premium fleet and book in seconds.</p>
+                    <a class="btn-primary" href="/cars">Browse Cars</a>
+                </div>`;
+          return;
+        }
+
+        container.innerHTML = bookings
+          .map((booking) => {
+            const car = booking.carId || booking.car || {};
+            const model = car.model || "Unknown Car";
+            const type = car.type || "—";
+            const pricePerDay = car.pricePerDay || 0;
+            const img =
+              car.imageUrl ||
+              booking.imageUrl ||
+              booking.car?.imageUrl ||
+              fallbackImg;
+            const start = new Date(booking.startDate);
+            const end = new Date(booking.endDate);
+            const durationDays = Math.max(
+              1,
+              Math.round((end - start) / (1000 * 60 * 60 * 24)) || 1
+            );
+            const distance = booking.distanceKm
+              ? `${booking.distanceKm} km`
+              : "—";
+            const estFare = pricePerDay
+              ? `$${pricePerDay * durationDays}`
+              : "—";
+            const pickup = booking.pickupLocation || "";
+            const dropoff = booking.dropoffLocation || "";
+            const status = (booking.status || "booked").toLowerCase();
+            const statusLabel =
+              status.charAt(0).toUpperCase() + status.slice(1);
+            const canCancel = status === "booked";
+            const mapUrl =
+              pickup && dropoff
+                ? `https://www.google.com/maps?q=${encodeURIComponent(
+                    pickup
+                  )}%20to%20${encodeURIComponent(dropoff)}&output=embed`
+                : "";
+            const mapExternal =
+              pickup && dropoff
+                ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+                    pickup
+                  )}&destination=${encodeURIComponent(dropoff)}`
+                : "";
+
+            return `
+                <div class="booking-card glass">
+                    <div class="card-media">
+                        <img src="${img}" alt="${model}" onerror="this.onerror=null;this.src='${fallbackImg}';" />
+                        <span class="status-pill status-${status}">${statusLabel}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-head">
+                            <div>
+                                <h3>${model}</h3>
+                                <p class="car-type">${type}</p>
+                            </div>
+                            <div class="price-chip">$${
+                              pricePerDay || "--"
+                            } /day</div>
+                        </div>
+
+                        <div class="summary-grid">
+                            <div class="summary-item"><i class="fas fa-clock"></i><div><p class="label">Duration</p><p class="value">${durationDays} day(s)</p></div></div>
+                            <div class="summary-item"><i class="fas fa-route"></i><div><p class="label">Distance</p><p class="value">${distance}</p></div></div>
+                            <div class="summary-item"><i class="fas fa-receipt"></i><div><p class="label">Est. Fare</p><p class="value">${estFare}</p></div></div>
+                            <div class="summary-item"><i class="fas fa-car-side"></i><div><p class="label">Category</p><p class="value">${type}</p></div></div>
+                        </div>
+
+                        <div class="timeline">
+                            <div class="timeline-node ${
+                              ["booked", "ongoing", "completed"].includes(
+                                status
+                              )
+                                ? "active"
+                                : ""
+                            }">
+                                <span class="dot"></span>
+                                <div>
+                                    <p class="label">Pickup</p>
+                                    <p class="value">${pickup || "TBD"}</p>
+                                    <p class="muted">${start.toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            <div class="timeline-connector"></div>
+                            <div class="timeline-node ${
+                              ["ongoing", "completed"].includes(status)
+                                ? "active"
+                                : ""
+                            }">
+                                <span class="dot"></span>
+                                <div>
+                                    <p class="label">Drop-off</p>
+                                    <p class="value">${dropoff || "TBD"}</p>
+                                    <p class="muted">${end.toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            <div class="timeline-connector"></div>
+                            <div class="timeline-node ${
+                              status === "completed" ? "active" : ""
+                            }">
+                                <span class="dot"></span>
+                                <div>
+                                    <p class="label">Status</p>
+                                    <p class="value">${statusLabel}</p>
+                                    <p class="muted">Progress</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${
+                          mapUrl
+                            ? `<div class="map-preview" onclick="expandMap('${mapExternal}')">
+                            <iframe src="${mapUrl}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            <div class="map-overlay"><span>Expand Map</span></div>
+                        </div>`
+                            : ""
+                        }
+
+                        <div class="card-actions">
+                            <button class="btn-secondary" onclick="openDetails('${
+                              booking._id
+                            }')">View Details</button>
+                            ${
+                              canCancel
+                                ? `<button class="btn-cancel" onclick="openCancelModal('${booking._id}')">Cancel Booking</button>`
+                                : `<button class="btn-cancel disabled" disabled>Cancel Booking</button>`
+                            }
+                        </div>
+                    </div>
+                </div>`;
+          })
+          .join("");
+      }
+
+      function openCancelModal(id) {
+        bookingToCancel = id;
+        document
+          .getElementById("cancelModal")
+          .setAttribute("aria-hidden", "false");
+        document.getElementById("cancelModal").classList.add("show");
+        const btn = document.getElementById("confirmCancelBtn");
+        btn.onclick = () => confirmCancel(id);
+      }
+
+      function closeCancelModal() {
+        document.getElementById("cancelModal").classList.remove("show");
+        document
+          .getElementById("cancelModal")
+          .setAttribute("aria-hidden", "true");
+        bookingToCancel = null;
+      }
+
+      async function confirmCancel(id) {
+        const token = localStorage.getItem("token");
+        const btn = document.getElementById("confirmCancelBtn");
+        btn.disabled = true;
+        btn.textContent = "Cancelling...";
+        try {
+          const res = await fetch(`/api/bookings/cancel/${id}`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (res.ok) {
+            closeCancelModal();
+            await loadBookings();
+          } else {
+            const data = await res.json().catch(() => ({}));
+            alert(data.message || "Failed to cancel booking");
+          }
+        } catch (err) {
+          alert("Error cancelling booking");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Yes, Cancel";
+        }
+      }
+
+      function openDetails(id) {
+        const booking = currentBookings.find((b) => b._id === id);
+        if (!booking) return;
+        const car = booking.carId || {};
+        const start = new Date(booking.startDate).toLocaleString();
+        const end = new Date(booking.endDate).toLocaleString();
+        const html = `
+        <h3>${car.model || "Booking Details"}</h3>
+        <div class="details-grid">
+            <div><p class="label">Pickup</p><p class="value">${
+              booking.pickupLocation || "TBD"
+            }</p></div>
+            <div><p class="label">Drop-off</p><p class="value">${
+              booking.dropoffLocation || "TBD"
+            }</p></div>
+            <div><p class="label">Start</p><p class="value">${start}</p></div>
+            <div><p class="label">End</p><p class="value">${end}</p></div>
+            <div><p class="label">Distance</p><p class="value">${
+              booking.distanceKm || "--"
+            } km</p></div>
+            <div><p class="label">Status</p><p class="value">${
+              booking.status
+            }</p></div>
         </div>
+    `;
+        document.getElementById("detailsContent").innerHTML = html;
+        document.getElementById("detailsModal").classList.add("show");
+        document
+          .getElementById("detailsModal")
+          .setAttribute("aria-hidden", "false");
+      }
+
+      function closeDetailsModal() {
+        document.getElementById("detailsModal").classList.remove("show");
+        document
+          .getElementById("detailsModal")
+          .setAttribute("aria-hidden", "true");
+      }
+
+      function expandMap(url) {
+        if (!url) return;
+        window.open(url, "_blank");
+      }
+    </script>
+
+    <footer class="footer">
+      <div class="footer-container">
+        <p>&copy; 2025 AutoEase. All rights reserved.</p>
+      </div>
     </footer>
 
     <script src="/js/auth.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/main.js"></script>
-</body>
+  </body>
 </html>

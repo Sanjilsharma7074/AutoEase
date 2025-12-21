@@ -3,48 +3,665 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Car Rental Service - Super Admin Dashboard</title>
+    <title>AutoEase - Super Admin Dashboard</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
     />
     <style>
+      :root {
+        --primary-gradient: linear-gradient(135deg, #0b76ff 0%, #0060d6 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --glass-border: rgba(255, 255, 255, 0.3);
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+        --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+      }
+
+      /* Hero Header with Animated Gradient */
+      .superadmin-hero {
+        background: var(--primary-gradient);
+        padding: 60px 0 40px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 0;
+      }
+
+      .superadmin-hero::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.2) 0%,
+          transparent 70%
+        );
+        animation: float 20s ease-in-out infinite;
+      }
+
+      .superadmin-hero::after {
+        content: "";
+        position: absolute;
+        bottom: -50%;
+        left: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.15) 0%,
+          transparent 70%
+        );
+        animation: float 15s ease-in-out infinite reverse;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translate(0, 0) rotate(0deg);
+        }
+        33% {
+          transform: translate(30px, -30px) rotate(5deg);
+        }
+        66% {
+          transform: translate(-20px, 20px) rotate(-5deg);
+        }
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        color: white;
+      }
+
+      .hero-title {
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+        animation: slideInDown 0.6s ease-out;
+      }
+
+      .hero-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.95;
+        margin-bottom: 40px;
+        animation: slideInUp 0.6s ease-out;
+      }
+
       .super-admin-badge {
         display: inline-block;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: rgba(11, 118, 255, 0.25);
+        backdrop-filter: blur(10px);
         color: white;
-        padding: 5px 15px;
+        padding: 8px 20px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        border: 1px solid rgba(11, 118, 255, 0.3);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+        }
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+        }
+      }
+
+      @keyframes slideInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Statistics Cards */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-top: -30px;
+        margin-bottom: 40px;
+        position: relative;
+        z-index: 3;
+      }
+
+      .stat-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
         border-radius: 20px;
+        padding: 30px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        transition: var(--transition-smooth);
+        animation: fadeInUp 0.6s ease-out backwards;
+      }
+
+      .stat-card:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+      .stat-card:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .stat-card:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 15px;
+        color: white;
+        transition: var(--transition-smooth);
+      }
+
+      .stat-card:nth-child(1) .stat-icon {
+        background: linear-gradient(135deg, #0b76ff 0%, #0060d6 100%);
+      }
+
+      .stat-card:nth-child(2) .stat-icon {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      }
+
+      .stat-card:nth-child(3) .stat-icon {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      }
+
+      .stat-card:hover .stat-icon {
+        transform: scale(1.1) rotate(5deg);
+      }
+
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 10px 0 5px;
+      }
+
+      .stat-label {
+        color: #666;
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+
+      /* Form Section with Premium Styling */
+      .create-admin-section {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        animation: fadeInUp 0.8s ease-out backwards;
+        animation-delay: 0.4s;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba(11, 118, 255, 0.2);
+      }
+
+      .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: var(--primary-gradient);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+
+      .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+      }
+
+      .section-subtitle {
+        color: #718096;
+        font-size: 0.85rem;
+      }
+
+      /* Enhanced Form Groups with Icons */
+      .form-group {
+        margin-bottom: 25px;
+        position: relative;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #2d3748;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .input-icon:hover {
+        color: #0b76ff;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 14px 18px 14px 50px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 15px;
+        transition: var(--transition-smooth);
+        background: white;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #0b76ff;
+        box-shadow: 0 0 0 4px rgba(11, 118, 255, 0.1);
+      }
+
+      .form-group input:focus + .input-icon {
+        color: #667eea;
+      }
+
+      .form-group input.valid {
+        border-color: #48bb78;
+      }
+
+      .form-group input.invalid {
+        border-color: #f56565;
+      }
+
+      /* Password Strength Indicator */
+      .password-wrapper {
+        position: relative;
+      }
+
+      .toggle-password {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #a0aec0;
+        transition: var(--transition-smooth);
+        z-index: 2;
+      }
+
+      .toggle-password:hover {
+        color: #0b76ff;
+      }
+
+      .password-strength {
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        margin-top: 8px;
+        overflow: hidden;
+      }
+
+      .password-strength-bar {
+        height: 100%;
+        width: 0;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+      }
+
+      .password-strength-bar.weak {
+        width: 33%;
+        background: #f56565;
+      }
+
+      .password-strength-bar.medium {
+        width: 66%;
+        background: #ed8936;
+      }
+
+      .password-strength-bar.strong {
+        width: 100%;
+        background: #48bb78;
+      }
+
+      .password-hint {
         font-size: 12px;
-        font-weight: bold;
-        margin-left: 10px;
+        color: #718096;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .password-hint.visible {
+        color: #48bb78;
+      }
+
+      /* Validation Messages */
+      .validation-message {
+        font-size: 13px;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .validation-message.error {
+        color: #f56565;
+      }
+
+      .validation-message.success {
+        color: #48bb78;
+      }
+
+      /* Submit Button with Gradient */
+      .btn-submit {
+        width: 100%;
+        padding: 16px 32px;
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+        margin-top: 10px;
+      }
+
+      .btn-submit::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .btn-submit:hover::before {
+        left: 100%;
+      }
+
+      .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(11, 118, 255, 0.4);
+      }
+
+      .btn-submit:active {
+        transform: translateY(0);
+      }
+
+      .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Admin Cards Section */
+      .admins-list-section {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        animation: fadeInUp 0.8s ease-out backwards;
+        animation-delay: 0.5s;
+      }
+
+      /* Skeleton Loader */
+      .skeleton-loader {
+        display: grid;
+        gap: 20px;
+      }
+
+      .skeleton-card {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        border: 1px solid #e2e8f0;
+        animation: pulse-skeleton 1.5s ease-in-out infinite;
+      }
+
+      @keyframes pulse-skeleton {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .skeleton-line {
+        height: 12px;
+        background: linear-gradient(
+          90deg,
+          #e2e8f0 25%,
+          #edf2f7 50%,
+          #e2e8f0 75%
+        );
+        background-size: 200% 100%;
+        animation: loading 1.5s ease-in-out infinite;
+        border-radius: 6px;
+        margin-bottom: 10px;
+      }
+
+      @keyframes loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      .skeleton-line.short {
+        width: 40%;
+      }
+      .skeleton-line.medium {
+        width: 60%;
+      }
+      .skeleton-line.long {
+        width: 80%;
+      }
+
+      /* Modern Admin Cards */
+      .admins-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
       }
 
       .admin-card {
         background: white;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 15px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out backwards;
+      }
+
+      .admin-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+      }
+
+      .admin-card:hover::before {
+        transform: scaleX(1);
+      }
+
+      .admin-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+        border-color: #0b76ff;
+      }
+
+      .admin-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .admin-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 600;
+        flex-shrink: 0;
       }
 
       .admin-info {
         flex: 1;
+        min-width: 0;
       }
 
-      .admin-info h3 {
-        margin: 0 0 5px 0;
-        color: #333;
+      .admin-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
-      .admin-info p {
-        margin: 0;
-        color: #666;
-        font-size: 14px;
+      .admin-email {
+        color: #718096;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .admin-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 15px;
+      }
+
+      .admin-status.active {
+        background: #c6f6d5;
+        color: #22543d;
+      }
+
+      .admin-status.inactive {
+        background: #fed7d7;
+        color: #742a2a;
+      }
+
+      .admin-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: #a0aec0;
+        font-size: 0.85rem;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .admin-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
       }
 
       .admin-actions {
@@ -52,51 +669,354 @@
         gap: 10px;
       }
 
-      .btn-danger {
-        background: #e74c3c;
-        color: white;
+      .btn-action {
+        flex: 1;
+        padding: 10px 16px;
         border: none;
-        padding: 8px 15px;
-        border-radius: 5px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
         cursor: pointer;
+        transition: var(--transition-smooth);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
       }
 
-      .btn-danger:hover {
-        background: #c0392b;
+      .btn-edit {
+        background: #ebf8ff;
+        color: #2c5282;
       }
 
-      .create-admin-section {
-        background: white;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 30px;
+      .btn-edit:hover {
+        background: #bee3f8;
+        transform: translateY(-2px);
       }
 
-      .admins-list-section {
-        background: white;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      .btn-disable {
+        background: #fffaf0;
+        color: #c05621;
       }
 
-      .section-title {
-        color: #333;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #667eea;
+      .btn-disable:hover {
+        background: #feebc8;
+        transform: translateY(-2px);
       }
 
+      .btn-delete {
+        background: #fff5f5;
+        color: #c53030;
+      }
+
+      .btn-delete:hover {
+        background: #fed7d7;
+        transform: translateY(-2px);
+      }
+
+      /* Enhanced Empty State */
       .empty-state {
         text-align: center;
-        padding: 40px;
-        color: #999;
+        padding: 60px 20px;
       }
 
-      .empty-state i {
-        font-size: 48px;
-        margin-bottom: 15px;
-        color: #ddd;
+      .empty-illustration {
+        width: 200px;
+        height: 200px;
+        margin: 0 auto 30px;
+        background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .empty-state h3 {
+        font-size: 1.6rem;
+        color: #2d3748;
+        margin-bottom: 10px;
+      }
+
+      .empty-state p {
+        color: #718096;
+        margin-bottom: 25px;
+        font-size: 1.05rem;
+      }
+
+      .btn-empty-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 30px;
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+      }
+
+      .btn-empty-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(11, 118, 255, 0.4);
+      }
+
+      /* Toast Notifications */
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .toast {
+        background: white;
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 300px;
+        animation: slideInRight 0.3s ease-out;
+        border-left: 4px solid;
+      }
+
+      @keyframes slideInRight {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .toast.success {
+        border-left-color: #48bb78;
+      }
+
+      .toast.error {
+        border-left-color: #f56565;
+      }
+
+      .toast.info {
+        border-left-color: #4299e1;
+      }
+
+      .toast-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .toast.success .toast-icon {
+        background: #c6f6d5;
+        color: #22543d;
+      }
+
+      .toast.error .toast-icon {
+        background: #fed7d7;
+        color: #742a2a;
+      }
+
+      .toast.info .toast-icon {
+        background: #bee3f8;
+        color: #2c5282;
+      }
+
+      .toast-content {
+        flex: 1;
+      }
+
+      .toast-title {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 2px;
+      }
+
+      .toast-message {
+        font-size: 14px;
+        color: #718096;
+      }
+
+      .toast-close {
+        background: none;
+        border: none;
+        color: #a0aec0;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-smooth);
+      }
+
+      .toast-close:hover {
+        color: #2d3748;
+      }
+
+      /* Confirmation Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9998;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: var(--shadow-lg);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+      }
+
+      .modal-overlay.active .modal-content {
+        transform: scale(1);
+      }
+
+      .modal-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #fed7d7;
+        color: #c53030;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        margin: 0 auto 20px;
+      }
+
+      .modal-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #2d3748;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .modal-message {
+        text-align: center;
+        color: #718096;
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 12px;
+      }
+
+      .btn-modal {
+        flex: 1;
+        padding: 14px 20px;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+      }
+
+      .btn-cancel {
+        background: #edf2f7;
+        color: #4a5568;
+      }
+
+      .btn-cancel:hover {
+        background: #e2e8f0;
+      }
+
+      .btn-confirm {
+        background: var(--secondary-gradient);
+        color: white;
+      }
+
+      .btn-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2rem;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .admins-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .create-admin-section,
+        .admins-list-section {
+          padding: 25px;
+        }
+
+        .toast {
+          min-width: 280px;
+        }
+      }
+
+      /* Tooltip */
+      .tooltip {
+        position: relative;
+        display: inline-block;
+      }
+
+      .tooltip::before {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 8px 12px;
+        background: #2d3748;
+        color: white;
+        border-radius: 8px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+
+      .tooltip:hover::before {
+        opacity: 1;
       }
     </style>
   </head>
@@ -104,7 +1024,7 @@
     <nav class="navbar">
       <div class="nav-container">
         <div class="nav-logo">
-          <a href="/"><i class="fas fa-car"></i> CarRental</a>
+          <a href="/"><i class="fas fa-car-side"></i> AutoEase</a>
         </div>
         <ul class="nav-menu">
           <li class="nav-item">
@@ -117,7 +1037,7 @@
             <a href="/admin" class="nav-link">Admin Panel</a>
           </li>
           <li class="nav-item">
-            <a href="/superadmin" class="nav-link" style="color: #667eea"
+            <a href="/superadmin" class="nav-link active" style="color: #667eea"
               >Super Admin</a
             >
           </li>
@@ -133,45 +1053,109 @@
       </div>
     </nav>
 
-    <main>
-      <div class="container">
-        <div class="page-header">
-          <h1>
-            Super Admin Dashboard
-            <span class="super-admin-badge">SUPER ADMIN</span>
-          </h1>
-          <p>Manage administrator accounts and system settings</p>
-        </div>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+      <div class="modal-content">
+        <div class="modal-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="modal-title">Confirm Delete</h3>
+        <p class="modal-message" id="modalMessage">
+          Are you sure you want to delete this admin account? This action cannot
+          be undone.
+        </p>
+        <div class="modal-actions">
+          <button class="btn-modal btn-cancel" onclick="closeModal()">
+            Cancel
+          </button>
+          <button class="btn-modal btn-confirm" id="confirmDeleteBtn">
+            Delete Admin
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <main>
+      <!-- Hero Header -->
+      <section class="superadmin-hero">
+        <div class="container">
+          <div class="hero-content">
+            <span class="super-admin-badge">
+              <i class="fas fa-crown"></i> SUPER ADMIN
+            </span>
+            <h1 class="hero-title">Super Admin Dashboard</h1>
+            <p class="hero-subtitle">
+              Manage administrator accounts and system settings with ease
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="container">
         <!-- Create Admin Account Section -->
         <div class="create-admin-section">
-          <h2 class="section-title">
-            <i class="fas fa-user-plus"></i> Create New Admin Account
-          </h2>
-          <div id="createAdminMessage" class="message"></div>
           <form id="createAdminForm">
             <div class="form-group">
-              <label for="adminName">Full Name:</label>
-              <input type="text" id="adminName" name="name" required />
+              <label for="adminName">Full Name</label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="adminName"
+                  name="name"
+                  placeholder="Enter full name"
+                  required
+                />
+              </div>
+              <div class="validation-message" id="nameValidation"></div>
             </div>
+
             <div class="form-group">
-              <label for="adminEmail">Email:</label>
-              <input type="email" id="adminEmail" name="email" required />
+              <label for="adminEmail">Email Address</label>
+              <div class="input-wrapper">
+                <input
+                  type="email"
+                  id="adminEmail"
+                  name="email"
+                  placeholder="admin@example.com"
+                  required
+                />
+              </div>
+              <div class="validation-message" id="emailValidation"></div>
             </div>
+
             <div class="form-group">
-              <label for="adminPassword">Password:</label>
-              <input
-                type="password"
-                id="adminPassword"
-                name="password"
-                required
-                minlength="6"
-              />
-              <small style="color: #666; font-size: 12px"
-                >Minimum 6 characters</small
-              >
+              <label for="adminPassword">Password</label>
+              <div class="input-wrapper password-wrapper">
+                <input
+                  type="password"
+                  id="adminPassword"
+                  name="password"
+                  placeholder="Enter secure password"
+                  required
+                  minlength="6"
+                />
+                <i class="toggle-password fas fa-eye" id="togglePassword"></i>
+              </div>
+              <div class="password-strength">
+                <div
+                  class="password-strength-bar"
+                  id="passwordStrengthBar"
+                ></div>
+              </div>
+              <div class="password-hint" id="passwordHint">
+                <i class="fas fa-info-circle"></i>
+                <span
+                  >At least 6 characters, mix of letters and numbers
+                  recommended</span
+                >
+              </div>
+              <div class="validation-message" id="passwordValidation"></div>
             </div>
-            <button type="submit" class="btn btn-primary">
+
+            <button type="submit" class="btn-submit" id="submitBtn">
               <i class="fas fa-plus-circle"></i> Create Admin Account
             </button>
           </form>
@@ -179,11 +1163,20 @@
 
         <!-- Admin Accounts List Section -->
         <div class="admins-list-section">
-          <h2 class="section-title">
-            <i class="fas fa-users-cog"></i> Existing Admin Accounts
-          </h2>
           <div id="adminsList">
-            <!-- Admin accounts will be loaded here -->
+            <!-- Skeleton Loader -->
+            <div class="skeleton-loader">
+              <div class="skeleton-card">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+              </div>
+              <div class="skeleton-card">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -191,7 +1184,7 @@
 
     <footer class="footer">
       <div class="footer-container">
-        <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
+        <p>&copy; 2025 AutoEase. All rights reserved.</p>
       </div>
     </footer>
 
@@ -199,63 +1192,294 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/main.js"></script>
     <script>
+      let allAdmins = [];
+      let deleteTargetId = null;
+      let deleteTargetName = null;
+
+      // Toast Notification System
+      function showToast(message, type = "info", title = "") {
+        const toastContainer = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+
+        const icons = {
+          success: "fa-check-circle",
+          error: "fa-exclamation-circle",
+          info: "fa-info-circle",
+        };
+
+        const titles = {
+          success: title || "Success",
+          error: title || "Error",
+          info: title || "Info",
+        };
+
+        toast.innerHTML = `
+          <div class="toast-icon">
+            <i class="fas ${icons[type]}"></i>
+          </div>
+          <div class="toast-content">
+            <div class="toast-title">${titles[type]}</div>
+            <div class="toast-message">${message}</div>
+          </div>
+          <button class="toast-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+          toast.style.animation = "slideInRight 0.3s ease-out reverse";
+          setTimeout(() => toast.remove(), 300);
+        }, 5000);
+      }
+
+      // Modal Functions
+      function showModal(adminId, adminName) {
+        deleteTargetId = adminId;
+        deleteTargetName = adminName;
+        document.getElementById(
+          "modalMessage"
+        ).textContent = `Are you sure you want to delete "${adminName}"? This action cannot be undone.`;
+        document.getElementById("confirmModal").classList.add("active");
+      }
+
+      function closeModal() {
+        document.getElementById("confirmModal").classList.remove("active");
+        deleteTargetId = null;
+        deleteTargetName = null;
+      }
+
+      // Form Validation
+      const nameInput = document.getElementById("adminName");
+      const emailInput = document.getElementById("adminEmail");
+      const passwordInput = document.getElementById("adminPassword");
+      const togglePassword = document.getElementById("togglePassword");
+
+      // Real-time name validation
+      nameInput.addEventListener("input", function () {
+        const value = this.value.trim();
+        const validation = document.getElementById("nameValidation");
+
+        if (value.length === 0) {
+          this.classList.remove("valid", "invalid");
+          validation.innerHTML = "";
+        } else if (value.length < 3) {
+          this.classList.add("invalid");
+          this.classList.remove("valid");
+          validation.innerHTML =
+            '<i class="fas fa-times-circle"></i> Name must be at least 3 characters';
+          validation.className = "validation-message error";
+        } else {
+          this.classList.add("valid");
+          this.classList.remove("invalid");
+          validation.innerHTML =
+            '<i class="fas fa-check-circle"></i> Looks good!';
+          validation.className = "validation-message success";
+        }
+      });
+
+      // Real-time email validation
+      emailInput.addEventListener("input", function () {
+        const value = this.value.trim();
+        const validation = document.getElementById("emailValidation");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (value.length === 0) {
+          this.classList.remove("valid", "invalid");
+          validation.innerHTML = "";
+        } else if (!emailRegex.test(value)) {
+          this.classList.add("invalid");
+          this.classList.remove("valid");
+          validation.innerHTML =
+            '<i class="fas fa-times-circle"></i> Please enter a valid email address';
+          validation.className = "validation-message error";
+        } else {
+          this.classList.add("valid");
+          this.classList.remove("invalid");
+          validation.innerHTML =
+            '<i class="fas fa-check-circle"></i> Email is valid';
+          validation.className = "validation-message success";
+        }
+      });
+
+      // Password strength checker
+      passwordInput.addEventListener("input", function () {
+        const value = this.value;
+        const strengthBar = document.getElementById("passwordStrengthBar");
+        const validation = document.getElementById("passwordValidation");
+        const hint = document.getElementById("passwordHint");
+
+        if (value.length === 0) {
+          strengthBar.className = "password-strength-bar";
+          this.classList.remove("valid", "invalid");
+          validation.innerHTML = "";
+          hint.classList.remove("visible");
+          return;
+        }
+
+        // Calculate strength
+        let strength = 0;
+        if (value.length >= 6) strength++;
+        if (value.length >= 10) strength++;
+        if (/[a-z]/.test(value) && /[A-Z]/.test(value)) strength++;
+        if (/[0-9]/.test(value)) strength++;
+        if (/[^a-zA-Z0-9]/.test(value)) strength++;
+
+        if (value.length < 6) {
+          strengthBar.className = "password-strength-bar weak";
+          this.classList.add("invalid");
+          this.classList.remove("valid");
+          validation.innerHTML =
+            '<i class="fas fa-times-circle"></i> Password must be at least 6 characters';
+          validation.className = "validation-message error";
+        } else if (strength <= 2) {
+          strengthBar.className = "password-strength-bar weak";
+          this.classList.add("valid");
+          this.classList.remove("invalid");
+          validation.innerHTML =
+            '<i class="fas fa-shield-alt"></i> Weak password';
+          validation.className = "validation-message error";
+        } else if (strength <= 3) {
+          strengthBar.className = "password-strength-bar medium";
+          this.classList.add("valid");
+          this.classList.remove("invalid");
+          validation.innerHTML =
+            '<i class="fas fa-shield-alt"></i> Medium strength';
+          validation.className = "validation-message";
+          validation.style.color = "#ed8936";
+        } else {
+          strengthBar.className = "password-strength-bar strong";
+          this.classList.add("valid");
+          this.classList.remove("invalid");
+          validation.innerHTML =
+            '<i class="fas fa-check-circle"></i> Strong password';
+          validation.className = "validation-message success";
+          hint.classList.add("visible");
+        }
+      });
+
+      // Toggle password visibility
+      togglePassword.addEventListener("click", function () {
+        const type = passwordInput.type === "password" ? "text" : "password";
+        passwordInput.type = type;
+        this.classList.toggle("fa-eye");
+        this.classList.toggle("fa-eye-slash");
+      });
+
       // Load existing admin accounts
       async function loadAdmins() {
         try {
           const token = localStorage.getItem("token");
           const response = await fetch("/auth/admins", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           });
 
           if (response.ok) {
-            const admins = await response.json();
-            displayAdmins(admins);
+            allAdmins = await response.json();
+            displayAdmins(allAdmins);
           } else {
             document.getElementById("adminsList").innerHTML =
-              '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load admin accounts</p></div>';
+              '<div class="empty-state"><div class="empty-illustration">⚠️</div><h3>Failed to Load</h3><p>Could not load admin accounts. Please refresh the page.</p></div>';
           }
         } catch (error) {
           console.error("Error loading admins:", error);
           document.getElementById("adminsList").innerHTML =
-            '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Error loading admin accounts</p></div>';
+            '<div class="empty-state"><div class="empty-illustration">⚠️</div><h3>Connection Error</h3><p>Unable to connect to the server. Please check your connection.</p></div>';
         }
+      }
+
+      function updateStats(admins) {
+        document.getElementById("totalAdmins").textContent = admins.length;
       }
 
       function displayAdmins(admins) {
         const adminsList = document.getElementById("adminsList");
 
         if (admins.length === 0) {
-          adminsList.innerHTML =
-            '<div class="empty-state"><i class="fas fa-user-slash"></i><p>No admin accounts found. Create one above.</p></div>';
+          adminsList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-illustration">
+                <i class="fas fa-users-slash"></i>
+              </div>
+              <h3>No Admin Accounts Yet</h3>
+              <p>Get started by creating your first admin account using the form above.</p>
+              <button class="btn-empty-action" onclick="document.getElementById('adminName').focus()">
+                <i class="fas fa-plus-circle"></i> Create First Admin
+              </button>
+            </div>
+          `;
           return;
         }
 
-        adminsList.innerHTML = admins
-          .map(
-            (admin) => `
-                <div class="admin-card">
-                    <div class="admin-info">
-                        <h3><i class="fas fa-user-shield"></i> ${
-                          admin.name
-                        }</h3>
-                        <p><i class="fas fa-envelope"></i> ${admin.email}</p>
-                        <p><i class="fas fa-calendar"></i> Created: ${new Date(
-                          admin.createdAt
-                        ).toLocaleDateString()}</p>
-                    </div>
-                    <div class="admin-actions">
-                        <button class="btn-danger" onclick="deleteAdmin('${
-                          admin._id
-                        }', '${admin.name}')">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </div>
+        adminsList.innerHTML =
+          `<div class="admins-grid">` +
+          admins
+            .map((admin, index) => {
+              const initials = admin.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .substring(0, 2);
+
+              const createdDate = new Date(admin.createdAt).toLocaleDateString(
+                "en-US",
+                {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                }
+              );
+
+              return `
+              <div class="admin-card" style="animation-delay: ${index * 0.1}s">
+                <div class="admin-header">
+                  <div class="admin-avatar">${initials}</div>
+                  <div class="admin-info">
+                    <div class="admin-name">${admin.name}</div>
+                    <div class="admin-email">${admin.email}</div>
+                  </div>
                 </div>
-            `
-          )
-          .join("");
+                
+                <div class="admin-status active">
+                  <i class="fas fa-circle"></i> Active
+                </div>
+
+                <div class="admin-meta">
+                  <div class="admin-meta-item tooltip" data-tooltip="Created Date">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>${createdDate}</span>
+                  </div>
+                  <div class="admin-meta-item tooltip" data-tooltip="User Role">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Admin</span>
+                  </div>
+                </div>
+
+                <div class="admin-actions">
+                  <button class="btn-action btn-edit tooltip" data-tooltip="Edit Admin" onclick="editAdmin('${
+                    admin._id
+                  }')">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn-action btn-disable tooltip" data-tooltip="Disable Admin" onclick="disableAdmin('${
+                    admin._id
+                  }')">
+                    <i class="fas fa-user-slash"></i>
+                  </button>
+                  <button class="btn-action btn-delete tooltip" data-tooltip="Delete Admin" onclick="showModal('${
+                    admin._id
+                  }', '${admin.name}')">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+            })
+            .join("") +
+          `</div>`;
       }
 
       // Create new admin account
@@ -264,10 +1488,42 @@
         .addEventListener("submit", async (e) => {
           e.preventDefault();
 
-          const messageDiv = document.getElementById("createAdminMessage");
-          const name = document.getElementById("adminName").value;
-          const email = document.getElementById("adminEmail").value;
-          const password = document.getElementById("adminPassword").value;
+          const name = nameInput.value.trim();
+          const email = emailInput.value.trim();
+          const password = passwordInput.value;
+          const submitBtn = document.getElementById("submitBtn");
+
+          // Validate
+          if (name.length < 3) {
+            showToast(
+              "Name must be at least 3 characters",
+              "error",
+              "Validation Error"
+            );
+            return;
+          }
+
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showToast(
+              "Please enter a valid email address",
+              "error",
+              "Validation Error"
+            );
+            return;
+          }
+
+          if (password.length < 6) {
+            showToast(
+              "Password must be at least 6 characters",
+              "error",
+              "Validation Error"
+            );
+            return;
+          }
+
+          submitBtn.disabled = true;
+          submitBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Creating...';
 
           try {
             const token = localStorage.getItem("token");
@@ -283,54 +1539,110 @@
             const data = await response.json();
 
             if (response.ok) {
-              messageDiv.innerHTML = `<div class="success">${data.message}</div>`;
+              showToast(
+                `Admin account for ${name} created successfully!`,
+                "success",
+                "Account Created"
+              );
               document.getElementById("createAdminForm").reset();
-              loadAdmins(); // Reload the admin list
-              setTimeout(() => {
-                messageDiv.innerHTML = "";
-              }, 5000);
+
+              // Reset validation states
+              nameInput.classList.remove("valid", "invalid");
+              emailInput.classList.remove("valid", "invalid");
+              passwordInput.classList.remove("valid", "invalid");
+              document.getElementById("nameValidation").innerHTML = "";
+              document.getElementById("emailValidation").innerHTML = "";
+              document.getElementById("passwordValidation").innerHTML = "";
+              document.getElementById("passwordStrengthBar").className =
+                "password-strength-bar";
+
+              loadAdmins();
             } else {
-              messageDiv.innerHTML = `<div class="error">${data.message}</div>`;
+              showToast(
+                data.message || "Failed to create admin account",
+                "error",
+                "Creation Failed"
+              );
             }
           } catch (error) {
             console.error("Error creating admin:", error);
-            messageDiv.innerHTML =
-              '<div class="error">Network error. Please try again.</div>';
+            showToast(
+              "Network error. Please check your connection and try again.",
+              "error",
+              "Connection Error"
+            );
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML =
+              '<i class="fas fa-plus-circle"></i> Create Admin Account';
           }
         });
 
       // Delete admin account
-      async function deleteAdmin(adminId, adminName) {
-        if (
-          !confirm(
-            `Are you sure you want to delete admin account: ${adminName}?\n\nThis action cannot be undone.`
-          )
-        ) {
-          return;
-        }
+      document
+        .getElementById("confirmDeleteBtn")
+        .addEventListener("click", async function () {
+          if (!deleteTargetId) return;
 
-        try {
-          const token = localStorage.getItem("token");
-          const response = await fetch(`/auth/admin/${adminId}`, {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          this.disabled = true;
+          this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
-          const data = await response.json();
+          try {
+            const token = localStorage.getItem("token");
+            const response = await fetch(`/auth/admin/${deleteTargetId}`, {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${token}` },
+            });
 
-          if (response.ok) {
-            alert(data.message);
-            loadAdmins(); // Reload the admin list
-          } else {
-            alert("Error: " + data.message);
+            const data = await response.json();
+
+            if (response.ok) {
+              showToast(
+                `Admin "${deleteTargetName}" has been deleted successfully`,
+                "success",
+                "Admin Deleted"
+              );
+              closeModal();
+              loadAdmins();
+            } else {
+              showToast(
+                data.message || "Failed to delete admin",
+                "error",
+                "Deletion Failed"
+              );
+            }
+          } catch (error) {
+            console.error("Error deleting admin:", error);
+            showToast(
+              "Network error. Please try again.",
+              "error",
+              "Connection Error"
+            );
+          } finally {
+            this.disabled = false;
+            this.innerHTML = "Delete Admin";
           }
-        } catch (error) {
-          console.error("Error deleting admin:", error);
-          alert("Network error. Please try again.");
-        }
+        });
+
+      // Placeholder functions for edit and disable
+      function editAdmin(adminId) {
+        showToast("Edit functionality coming soon!", "info", "Feature Preview");
       }
+
+      function disableAdmin(adminId) {
+        showToast(
+          "Disable functionality coming soon!",
+          "info",
+          "Feature Preview"
+        );
+      }
+
+      // Close modal on overlay click
+      document
+        .getElementById("confirmModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) closeModal();
+        });
 
       // Load admins on page load
       document.addEventListener("DOMContentLoaded", () => {

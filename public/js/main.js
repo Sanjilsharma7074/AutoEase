@@ -17,6 +17,33 @@ if (hamburger && navMenu) {
   );
 }
 
+// Navbar scroll effect
+let lastScroll = 0;
+const navbar = document.querySelector(".navbar");
+
+window.addEventListener("scroll", () => {
+  const currentScroll = window.pageYOffset;
+
+  if (currentScroll > 50) {
+    navbar.classList.add("scrolled");
+  } else {
+    navbar.classList.remove("scrolled");
+  }
+
+  lastScroll = currentScroll;
+});
+
+// Highlight active nav link based on current page
+const currentLocation = location.pathname;
+const navLinks = document.querySelectorAll(".nav-link");
+
+navLinks.forEach((link) => {
+  if (link.getAttribute("href") === currentLocation) {
+    link.classList.add("active");
+    link.parentElement.classList.add("active");
+  }
+});
+
 // Smooth scrolling for anchor links
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   anchor.addEventListener("click", function (e) {
@@ -54,40 +81,39 @@ function validateDates(startDate, endDate) {
   if (end <= start) {
     return { valid: false, message: "End date must be after start date" };
   }
+}
 
-  }
-
-  document.addEventListener("DOMContentLoaded", function () {
-    // Add click handlers for cards with hover effects
-    const cards = document.querySelectorAll(
-      ".car-card, .booking-card, .feature-card"
-    );
-    cards.forEach((card) => {
-      card.addEventListener("mouseenter", function () {
-        this.style.transform = "translateY(-5px)";
-      });
-
-      card.addEventListener("mouseleave", function () {
-        this.style.transform = "translateY(0)";
-      });
+document.addEventListener("DOMContentLoaded", function () {
+  // Add click handlers for cards with hover effects
+  const cards = document.querySelectorAll(
+    ".car-card, .booking-card, .feature-card"
+  );
+  cards.forEach((card) => {
+    card.addEventListener("mouseenter", function () {
+      this.style.transform = "translateY(-5px)";
     });
 
-    // Auto-hide alerts after 5 seconds
-    const alerts = document.querySelectorAll(".success, .error");
-    alerts.forEach((alert) => {
-      setTimeout(() => {
-        alert.style.opacity = "0";
-        setTimeout(() => alert.remove(), 300);
-      }, 5000);
-    });
-
-    // Set minimum date for date inputs to today
-    const dateInputs = document.querySelectorAll('input[type="date"]');
-    const today = new Date().toISOString().split("T")[0];
-    dateInputs.forEach((input) => {
-      input.min = today;
+    card.addEventListener("mouseleave", function () {
+      this.style.transform = "translateY(0)";
     });
   });
+
+  // Auto-hide alerts after 5 seconds
+  const alerts = document.querySelectorAll(".success, .error");
+  alerts.forEach((alert) => {
+    setTimeout(() => {
+      alert.style.opacity = "0";
+      setTimeout(() => alert.remove(), 300);
+    }, 5000);
+  });
+
+  // Set minimum date for date inputs to today
+  const dateInputs = document.querySelectorAll('input[type="date"]');
+  const today = new Date().toISOString().split("T")[0];
+  dateInputs.forEach((input) => {
+    input.min = today;
+  });
+});
 
 // Utility function to make API calls with authentication
 async function apiCall(url, options = {}) {
@@ -128,7 +154,7 @@ async function apiCall(url, options = {}) {
 }
 
 // Setup WebSocket connection (Socket.IO)
-;(function () {
+(function () {
   // Guard against pages where the Socket.IO client script wasn't included
   if (typeof io === "undefined") {
     console.warn("Socket.IO client not available: 'io' is undefined");

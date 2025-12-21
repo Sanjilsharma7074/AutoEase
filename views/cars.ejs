@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Car Rental Service - Cars</title>
+    <title>AutoEase - Cars</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -14,7 +14,7 @@
     <nav class="navbar">
       <div class="nav-container">
         <div class="nav-logo">
-          <a href="/"><i class="fas fa-car"></i> CarRental</a>
+          <a href="/"><i class="fas fa-car-side"></i> AutoEase</a>
         </div>
         <ul class="nav-menu">
           <li class="nav-item">
@@ -52,21 +52,44 @@
 
     <main>
       <div class="container">
-        <div class="page-header">
-          <h1>Available Cars</h1>
-          <p>Choose from our wide selection of vehicles</p>
-        </div>
-
-        <div class="filter-section">
-          <div class="filter-controls">
-            <select id="typeFilter">
-              <option value="">All Types</option>
-            </select>
-            <button class="btn btn-secondary" onclick="filterCars()">
-              Filter by Type
-            </button>
+        <!-- Hero: Available Cars -->
+        <section class="cars-hero">
+          <div class="hero-inner">
+            <h1 class="cars-hero-title">
+              Available Cars
+              <span class="title-underline"></span>
+            </h1>
+            <p class="cars-hero-subtitle">
+              Find the perfect ride for any occasion — luxury, comfort, and
+              performance curated for you.
+            </p>
           </div>
-        </div>
+          <div class="hero-shape hero-shape-a"></div>
+          <div class="hero-shape hero-shape-b"></div>
+        </section>
+
+        <!-- Filters: chips + price -->
+        <section class="filter-bar">
+          <div class="filter-left">
+            <label class="price-label">Model:</label>
+            <select id="modelFilter" class="model-filter">
+              <option value="">All Models</option>
+            </select>
+          </div>
+          <div class="filter-right">
+            <label class="price-label"
+              >Max Price: <span id="priceValue">$0</span></label
+            >
+            <input
+              type="range"
+              id="priceRange"
+              min="0"
+              max="500"
+              value="500"
+              step="10"
+            />
+          </div>
+        </section>
 
         <div id="carsContainer" class="cars-grid">
           <!-- Cars will be loaded here -->
@@ -128,43 +151,57 @@
 
       <script>
         let allCars = [];
-        let currentStartDate = "";
-        let currentEndDate = "";
+        let maxPrice = 500;
+        let selectedModel = "";
 
         // Load cars on page load
         document.addEventListener("DOMContentLoaded", function () {
           loadCars();
 
-          // Populate type filter options from server
-          loadTypes();
+          // Price range
+          const range = document.getElementById("priceRange");
+          const priceValue = document.getElementById("priceValue");
+          range.addEventListener("input", () => {
+            maxPrice = Number(range.value);
+            priceValue.textContent = `$${maxPrice}`;
+            applyFilters();
+          });
 
-          // Set minimum date for date inputs to today
-          const today = new Date().toISOString().split("T")[0];
-          document.getElementById("filterStartDate").min = today;
-          document.getElementById("filterEndDate").min = today;
-
-          // Update end date minimum when start date changes
+          // Model filter
           document
-            .getElementById("filterStartDate")
-            .addEventListener("change", function () {
-              const startDate = this.value;
-              if (startDate) {
-                document.getElementById("filterEndDate").min = startDate;
-              }
+            .getElementById("modelFilter")
+            .addEventListener("change", (e) => {
+              selectedModel = e.target.value;
+              applyFilters();
             });
         });
 
-        async function loadCars(startDate = "", endDate = "") {
+        async function loadCars() {
           try {
-            let url = "/api/cars";
-            if (startDate && endDate) {
-              url += `?startDate=${startDate}&endDate=${endDate}`;
-              currentStartDate = startDate;
-              currentEndDate = endDate;
-            }
-
-            const response = await fetch(url);
+            const response = await fetch("/api/cars");
             allCars = await response.json();
+            // Initialize price slider to max observed price
+            const highest = Math.max(...allCars.map((c) => c.pricePerDay), 0);
+            const range = document.getElementById("priceRange");
+            range.max = highest || 500;
+            range.value = highest || 500;
+            maxPrice = Number(range.value);
+            document.getElementById("priceValue").textContent = `$${maxPrice}`;
+
+            // Populate model filter
+            const modelSelect = document.getElementById("modelFilter");
+            const models = Array.from(
+              new Set(allCars.map((c) => c.model))
+            ).sort();
+            // clear existing except first
+            while (modelSelect.options.length > 1) modelSelect.remove(1);
+            models.forEach((m) => {
+              const opt = document.createElement("option");
+              opt.value = m;
+              opt.textContent = m;
+              modelSelect.appendChild(opt);
+            });
+
             displayCars(allCars);
             document.getElementById("loading").style.display = "none";
           } catch (error) {
@@ -172,26 +209,13 @@
           }
         }
 
-        async function checkAvailability() {
-          const startDate = document.getElementById("filterStartDate").value;
-          const endDate = document.getElementById("filterEndDate").value;
-
-          if (!startDate || !endDate) {
-            alert("Please select both start and end dates");
-            return;
-          }
-
-          if (new Date(startDate) >= new Date(endDate)) {
-            alert("End date must be after start date");
-            return;
-          }
-
-          document.getElementById("loading").style.display = "block";
-          await loadCars(startDate, endDate);
-
-          // Update the booking modal with selected dates
-          document.getElementById("startDate").value = startDate;
-          document.getElementById("endDate").value = endDate;
+        function applyFilters() {
+          const filtered = allCars.filter((car) => {
+            const matchesModel = !selectedModel || car.model === selectedModel;
+            const matchesPrice = Number(car.pricePerDay) <= maxPrice;
+            return matchesModel && matchesPrice;
+          });
+          displayCars(filtered);
         }
 
         function displayCars(cars) {
@@ -205,41 +229,103 @@
           }
 
           container.innerHTML = cars
-            .map(
-              (car) => `
-        <div class="car-card">
-            <div class="car-image">
-              <img src="${car.imageUrl || defaultImage}" alt="${
+            .map((car) => {
+              const image = car.imageUrl || defaultImage;
+              const rating = Number(car.rating || 4.7);
+              const fullStars = Math.floor(rating);
+              const halfStar = rating - fullStars >= 0.5;
+              const badge =
+                car.badge ||
+                (car.pricePerDay <= 50
+                  ? "Best Deal"
+                  : car.type === "Luxury"
+                  ? "Popular"
+                  : "");
+              const discount = Number(car.discountPercent || 0);
+              const price = Number(car.pricePerDay);
+              const discounted =
+                discount > 0
+                  ? Math.max(1, Math.round(price - (price * discount) / 100))
+                  : price;
+              const availabilityText = car.availability
+                ? "Available Today"
+                : "Not Available";
+              const availabilityClass = car.availability
+                ? "available"
+                : "unavailable";
+
+              const starsHtml = `${"\n"}${Array.from({ length: fullStars })
+                .map(() => '<i class="fas fa-star"></i>')
+                .join("")}${
+                halfStar ? '<i class="fas fa-star-half-alt"></i>' : ""
+              }${Array.from({ length: 5 - fullStars - (halfStar ? 1 : 0) })
+                .map(() => '<i class="far fa-star"></i>')
+                .join("")}`;
+
+              return `
+            <div class="car-card modern">
+              ${
+                badge
+                  ? `<span class="car-badge ${
+                      badge === "Best Deal" ? "deal" : "popular"
+                    }">${badge}</span>`
+                  : ""
+              }
+              <div class="car-image zoomable">
+                <img src="${image}" alt="${
                 car.model
-              }" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0; background: #f5f5f5;" onerror="this.onerror=null;this.src='${defaultImage}';">
-            </div>
-            <div class="car-info">
-                <h3>${car.model}</h3>
-                <p class="car-type">${car.type}</p>
-                <p class="car-price">$${car.pricePerDay}/day</p>
-                <p class="car-status ${
-                  car.availability ? "available" : "unavailable"
-                }">
-                    ${car.availability ? "Available" : "Not Available"}
-                </p>
-                ${
-                  currentStartDate && currentEndDate && car.availability
-                    ? `<p class="availability-info">Available for ${formatDate(
-                        currentStartDate
-                      )} - ${formatDate(currentEndDate)}</p>`
-                    : ""
-                }
-            </div>
-            <div class="car-actions">
+              }" onerror="this.onerror=null;this.src='${defaultImage}';">
+              </div>
+              <div class="car-info">
+                <div class="car-header">
+                  <h3>${car.model}</h3>
+                  <span class="car-type">${car.type}</span>
+                </div>
+                <div class="rating">${starsHtml}<span class="rating-number">${rating.toFixed(
+                1
+              )}</span></div>
+                <div class="car-features">
+                  <span class="feature-tag"><i class="fas fa-users"></i> 4-5 Seats</span>
+                  <span class="feature-tag"><i class="fas fa-cog"></i> Automatic</span>
+                  <span class="feature-tag"><i class="fas fa-gas-pump"></i> Gasoline</span>
+                  <span class="feature-tag"><i class="fas fa-snowflake"></i> AC</span>
+                  <span class="feature-tag"><i class="fas fa-suitcase"></i> 3 Luggage</span>
+                  <span class="feature-tag"><i class="fas fa-door-open"></i> 4 Doors</span>
+                </div>
+                <div class="price-row">
+                  ${
+                    discount > 0
+                      ? `<span class="price-old">$${price}</span>`
+                      : ""
+                  }
+                  <span class="price-now">$${discounted}</span><span class="price-period">/day</span>
+                  ${
+                    discount > 0
+                      ? `<span class="discount-badge">-${discount}%</span>`
+                      : ""
+                  }
+                </div>
+                <div class="availability ${availabilityClass}">
+                  <span class="dot"></span>
+                  <span>${availabilityText}</span>
+                </div>
+              </div>
+              <div class="car-actions">
                 ${
                   car.availability
-                    ? `<button class="btn btn-primary" onclick="openBookingModal('${car._id}', '${car.model}', ${car.pricePerDay})">Book Now</button>`
-                    : `<button class="btn btn-disabled" disabled>Not Available</button>`
+                    ? `
+                <button class="btn-book" onclick="bookNow('${car._id}','${car.model}',${price})">Book Now</button>
+                `
+                    : `
+                <button class="btn-disabled" disabled>Not Available</button>
+                `
                 }
-            </div>
-        </div>
-    `
-            )
+                <button class="btn-secondary" onclick="viewDetails('${
+                  car._id
+                }')">View Details</button>
+              </div>
+            </div>`;
+            })
             .join("");
         }
 
@@ -251,42 +337,12 @@
           });
         }
 
-        async function loadTypes() {
-          try {
-            const res = await fetch("/api/cars/types");
-            const types = await res.json();
-            const select = document.getElementById("typeFilter");
-
-            // Preserve the first "All Types" option, then add fetched types
-            // Clear any existing non-default options
-            while (select.options.length > 1) {
-              select.remove(1);
-            }
-
-            types.forEach((type) => {
-              const opt = document.createElement("option");
-              opt.value = type; // use exact type string
-              opt.textContent = type;
-              select.appendChild(opt);
-            });
-          } catch (err) {
-            console.error("Failed to load car types", err);
-          }
+        // Optional navigation for details
+        function viewDetails(id) {
+          window.location.hash = `car-${id}`;
         }
 
-        function filterCars() {
-          const typeFilter = document.getElementById("typeFilter").value;
-
-          let filteredCars = allCars;
-
-          if (typeFilter) {
-            filteredCars = allCars.filter((car) => car.type === typeFilter);
-          }
-
-          displayCars(filteredCars);
-        }
-
-        function openBookingModal(carId, carModel, pricePerDay) {
+        function bookNow(carId, carModel, pricePerDay) {
           if (!isLoggedIn()) {
             alert("Please login to book a car");
             window.location.href = "/login";
@@ -296,11 +352,13 @@
           document.getElementById("carId").value = carId;
           document.getElementById("bookingModal").style.display = "block";
 
-          // Pre-fill dates if they were selected for availability check
-          if (currentStartDate && currentEndDate) {
-            document.getElementById("startDate").value = currentStartDate;
-            document.getElementById("endDate").value = currentEndDate;
-            calculateCost();
+          // Button loading animation
+          const btn = Array.from(document.querySelectorAll(".btn-book")).find(
+            (b) => b.onclick && b.onclick.toString().includes(carId)
+          );
+          if (btn) {
+            btn.classList.add("loading");
+            setTimeout(() => btn.classList.remove("loading"), 1200);
           }
 
           // Calculate total cost when dates change
@@ -446,7 +504,7 @@
                 setTimeout(() => {
                   document.getElementById("bookingModal").style.display =
                     "none";
-                  loadCars(currentStartDate, currentEndDate); // Reload cars with current date filter to update availability
+                  loadCars(); // Reload cars to reflect updated availability
                 }, 2000);
               } else {
                 messageDiv.innerHTML = `<div class="error">${
@@ -463,7 +521,7 @@
 
     <footer class="footer">
       <div class="footer-container">
-        <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
+        <p>&copy; 2025 AutoEase. All rights reserved.</p>
       </div>
     </footer>
 

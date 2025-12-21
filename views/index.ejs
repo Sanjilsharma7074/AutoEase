@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Car Rental Service - Home</title>
+    <title>AutoEase - Home</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -14,7 +14,7 @@
     <nav class="navbar">
       <div class="nav-container">
         <div class="nav-logo">
-          <a href="/"><i class="fas fa-car"></i> CarRental</a>
+          <a href="/"><i class="fas fa-car-side"></i> AutoEase</a>
         </div>
         <ul class="nav-menu">
           <li class="nav-item">
@@ -52,45 +52,335 @@
 
     <main>
       <div class="hero-section">
-        <div class="hero-content">
-          <h1>Welcome to Car Rental Service</h1>
-          <p>Find and book the perfect car for your next adventure</p>
-          <div class="hero-buttons">
-            <a href="/cars" class="btn btn-primary">Browse Cars</a>
-            <a href="/signup" class="btn btn-secondary" id="hero-signup"
-              >Get Started</a
-            >
+        <div class="hero-overlay"></div>
+        <div class="container">
+          <div class="hero-wrapper">
+            <div class="hero-content">
+              <div class="hero-badge animate-fade-in">
+                <i class="fas fa-crown"></i>
+                <span>Premium Auto Rental Service</span>
+              </div>
+              <h1 class="animate-slide-up">Your Journey Starts Here</h1>
+              <p class="hero-subtitle animate-slide-up delay-1">
+                Experience luxury and comfort with our premium fleet. Whether
+                it's business or leisure, find the perfect vehicle for every
+                occasion.
+              </p>
+              <div class="hero-features animate-fade-in delay-2">
+                <div class="hero-feature">
+                  <i class="fas fa-shield-check"></i>
+                  <span>Fully Insured</span>
+                </div>
+                <div class="hero-feature">
+                  <i class="fas fa-tags"></i>
+                  <span>Best Rates</span>
+                </div>
+                <div class="hero-feature">
+                  <i class="fas fa-bolt"></i>
+                  <span>Instant Booking</span>
+                </div>
+              </div>
+              <div class="hero-buttons animate-slide-up delay-3">
+                <a href="/cars" class="btn btn-cta btn-large">
+                  <span><i class="fas fa-search"></i> Explore Our Fleet</span>
+                </a>
+                <a href="#features" class="btn btn-secondary-cta btn-large">
+                  <span><i class="fas fa-info-circle"></i> Learn More</span>
+                </a>
+              </div>
+              <div class="hero-trust animate-fade-in delay-4">
+                <div class="trust-item">
+                  <i class="fas fa-check-circle"></i>
+                  <span>No Hidden Fees</span>
+                </div>
+                <div class="trust-item">
+                  <i class="fas fa-check-circle"></i>
+                  <span>24/7 Support</span>
+                </div>
+                <div class="trust-item">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Free Cancellation</span>
+                </div>
+              </div>
+            </div>
+            <div class="hero-image">
+              <div class="hero-image-wrapper animate-float">
+                <img
+                  src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800&h=600&fit=crop"
+                  alt="Luxury Car"
+                  class="hero-car-img"
+                />
+                <div class="hero-image-decoration">
+                  <div class="decoration-circle circle-1"></div>
+                  <div class="decoration-circle circle-2"></div>
+                  <div class="decoration-circle circle-3"></div>
+                </div>
+              </div>
+              <div class="hero-stats">
+                <div class="stat-item">
+                  <div class="stat-number">
+                    <span class="counter">500</span>+
+                  </div>
+                  <div class="stat-label">Premium Vehicles</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-number">
+                    <span class="counter">15000</span>+
+                  </div>
+                  <div class="stat-label">Happy Customers</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-number">4.9<i class="fas fa-star"></i></div>
+                  <div class="stat-label">Average Rating</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-shape shape-1"></div>
+        <div class="hero-shape shape-2"></div>
+      </div>
+
+      <div class="features-section" id="features">
+        <div class="container">
+          <div class="section-header">
+            <h2>Why Choose AutoEase?</h2>
+            <p>Experience the difference with our premium car rental service</p>
+          </div>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon-wrapper">
+                <i class="fas fa-car-side"></i>
+              </div>
+              <h3>Premium Fleet</h3>
+              <p>
+                Choose from our extensive collection of luxury and economy
+                vehicles
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon-wrapper">
+                <i class="fas fa-clock"></i>
+              </div>
+              <h3>24/7 Availability</h3>
+              <p>
+                Book anytime with instant confirmation and flexible pickup times
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon-wrapper">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <h3>Full Insurance</h3>
+              <p>
+                Complete coverage with zero-deductible insurance on all rentals
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon-wrapper">
+                <i class="fas fa-hand-holding-dollar"></i>
+              </div>
+              <h3>Best Price Guarantee</h3>
+              <p>
+                Transparent pricing with no hidden fees and price match
+                guarantee
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon-wrapper">
+                <i class="fas fa-headset"></i>
+              </div>
+              <h3>Expert Support</h3>
+              <p>Dedicated customer service team available round the clock</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon-wrapper">
+                <i class="fas fa-location-dot"></i>
+              </div>
+              <h3>Multiple Locations</h3>
+              <p>Convenient pickup and drop-off points across major cities</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="features-section">
+      <!-- Testimonials Section -->
+      <div class="testimonials-section">
         <div class="container">
-          <h2>Why Choose Us?</h2>
-          <div class="features-grid">
-            <div class="feature-card">
-              <i class="fas fa-car"></i>
-              <h3>Wide Selection</h3>
-              <p>Choose from a variety of cars to suit your needs</p>
+          <div class="section-header">
+            <h2>What Our Customers Say</h2>
+            <p>Real experiences from real customers</p>
+          </div>
+          <div class="testimonials-grid">
+            <div class="testimonial-card">
+              <div class="testimonial-rating">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p class="testimonial-text">
+                "Exceptional service! The car was in perfect condition and the
+                booking process was incredibly smooth. Will definitely rent
+                again."
+              </p>
+              <div class="testimonial-author">
+                <div class="author-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="author-info">
+                  <h4>Sarah Johnson</h4>
+                  <p>Business Traveler</p>
+                </div>
+              </div>
             </div>
-            <div class="feature-card">
-              <i class="fas fa-clock"></i>
-              <h3>24/7 Service</h3>
-              <p>Book anytime, anywhere with our easy online system</p>
+            <div class="testimonial-card">
+              <div class="testimonial-rating">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p class="testimonial-text">
+                "Best car rental experience I've had. Great prices, friendly
+                staff, and the vehicle exceeded my expectations."
+              </p>
+              <div class="testimonial-author">
+                <div class="author-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="author-info">
+                  <h4>Michael Chen</h4>
+                  <p>Vacation Renter</p>
+                </div>
+              </div>
             </div>
-            <div class="feature-card">
-              <i class="fas fa-shield-alt"></i>
-              <h3>Secure Booking</h3>
-              <p>Your bookings are safe and secure with us</p>
+            <div class="testimonial-card">
+              <div class="testimonial-rating">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p class="testimonial-text">
+                "Outstanding customer service and premium vehicles. The 24/7
+                support team was incredibly helpful during my trip."
+              </p>
+              <div class="testimonial-author">
+                <div class="author-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="author-info">
+                  <h4>Emma Williams</h4>
+                  <p>Corporate Client</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </main>
 
-    <footer class="footer">
-      <div class="footer-container">
-        <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
+    <footer class="footer-enhanced">
+      <div class="footer-content">
+        <div class="container">
+          <div class="footer-grid">
+            <div class="footer-col footer-brand">
+              <div class="footer-logo">
+                <i class="fas fa-car-side"></i>
+                <span>AutoEase</span>
+              </div>
+              <p class="footer-description">
+                Your trusted partner for premium car rentals. Experience luxury,
+                comfort, and reliability with every journey.
+              </p>
+              <div class="footer-social">
+                <a href="#" class="social-link"
+                  ><i class="fab fa-facebook-f"></i
+                ></a>
+                <a href="#" class="social-link"
+                  ><i class="fab fa-twitter"></i
+                ></a>
+                <a href="#" class="social-link"
+                  ><i class="fab fa-instagram"></i
+                ></a>
+                <a href="#" class="social-link"
+                  ><i class="fab fa-linkedin-in"></i
+                ></a>
+              </div>
+            </div>
+            <div class="footer-col">
+              <h4>Quick Links</h4>
+              <ul class="footer-links">
+                <li>
+                  <a href="/"><i class="fas fa-chevron-right"></i> Home</a>
+                </li>
+                <li>
+                  <a href="/cars"
+                    ><i class="fas fa-chevron-right"></i> Browse Cars</a
+                  >
+                </li>
+                <li>
+                  <a href="/bookings"
+                    ><i class="fas fa-chevron-right"></i> My Bookings</a
+                  >
+                </li>
+                <li>
+                  <a href="/about"
+                    ><i class="fas fa-chevron-right"></i> About Us</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <div class="footer-col">
+              <h4>Services</h4>
+              <ul class="footer-links">
+                <li>
+                  <a href="#"
+                    ><i class="fas fa-chevron-right"></i> Corporate Rentals</a
+                  >
+                </li>
+                <li>
+                  <a href="#"
+                    ><i class="fas fa-chevron-right"></i> Long-term Leasing</a
+                  >
+                </li>
+                <li>
+                  <a href="#"
+                    ><i class="fas fa-chevron-right"></i> Airport Transfer</a
+                  >
+                </li>
+                <li>
+                  <a href="#"
+                    ><i class="fas fa-chevron-right"></i> Chauffeur Service</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <div class="footer-col">
+              <h4>Contact Us</h4>
+              <ul class="footer-contact">
+                <li><i class="fas fa-phone"></i> +1 (555) 123-4567</li>
+                <li><i class="fas fa-envelope"></i> info@autoease.com</li>
+                <li>
+                  <i class="fas fa-map-marker-alt"></i> 123 Auto Street, City
+                </li>
+                <li><i class="fas fa-clock"></i> 24/7 Available</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <p>
+            &copy; 2025 AutoEase. All rights reserved. |
+            <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+          </p>
+        </div>
       </div>
     </footer>
 
