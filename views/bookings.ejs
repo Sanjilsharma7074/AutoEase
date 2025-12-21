@@ -160,7 +160,6 @@ async function cancelBooking(bookingId) {
 </html> -->
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -168,8 +167,8 @@ async function cancelBooking(bookingId) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Bookings</title>
 
-  <link rel="stylesheet" href="/css/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 </head>
 
@@ -180,27 +179,34 @@ async function cancelBooking(bookingId) {
     <div class="nav-logo">
       <a href="/"><i class="fas fa-car"></i> CarRental</a>
     </div>
+
     <ul class="nav-menu">
-      <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
-      <li class="nav-item"><a href="/cars" class="nav-link">Cars</a></li>
-      <li class="nav-item"><a href="/bookings" class="nav-link">My Bookings</a></li>
-      <li class="nav-item"><a href="#" onclick="logout()" class="nav-link">Logout</a></li>
+      <li><a href="/" class="nav-link">Home</a></li>
+      <li><a href="/cars" class="nav-link">Cars</a></li>
+      <li><a href="/bookings" class="nav-link active">My Bookings</a></li>
+      <li><a href="#" class="nav-link" onclick="logout()">Logout</a></li>
     </ul>
+
+    <div class="hamburger">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
   </div>
 </nav>
 
 <main>
   <div class="container">
-    <h1>My Bookings</h1>
+    <h1 class="page-title">My Bookings</h1>
 
-    <div id="loading" class="loading">Loading bookings...</div>
-    <div id="bookingsContainer"></div>
+    <div id="loading" class="loading">Loading bookings…</div>
+    <div id="bookingsContainer" class="bookings-grid"></div>
   </div>
 </main>
 
 <footer class="footer">
   <div class="footer-container">
-    <p>&copy; 2025 Car Rental Service</p>
+    <p>&copy; 2025 Car Rental Service. All rights reserved.</p>
   </div>
 </footer>
 
@@ -208,7 +214,78 @@ async function cancelBooking(bookingId) {
 <script src="/js/main.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 
-<!-- your existing booking JS stays exactly the same -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (!isLoggedIn()) {
+    window.location.href = '/login';
+    return;
+  }
+  loadBookings();
+});
+
+async function loadBookings() {
+  const token = localStorage.getItem('token');
+
+  try {
+const response = await fetch('/api/bookings/my-bookings', {
+  headers: { Authorization: `Bearer ${token}` }
+});
+
+
+    const bookings = await response.json();
+    displayBookings(bookings);
+    document.getElementById('loading').style.display = 'none';
+  } catch {
+    document.getElementById('loading').innerText = 'Error loading bookings';
+  }
+}
+
+function displayBookings(bookings) {
+  const container = document.getElementById('bookingsContainer');
+
+  if (!bookings.length) {
+    container.innerHTML = `<div class="no-bookings">You have no bookings yet.</div>`;
+    return;
+  }
+
+  container.innerHTML = bookings.map(b => `
+    <div class="booking-card">
+      <div class="booking-info">
+        <h3>${b.carId?.model || 'Unknown Car'}</h3>
+        <p><strong>Type:</strong> ${b.carId?.type || 'N/A'}</p>
+        <p><strong>Start:</strong> ${new Date(b.startDate).toLocaleDateString()}</p>
+        <p><strong>End:</strong> ${new Date(b.endDate).toLocaleDateString()}</p>
+        <p><strong>Status:</strong>
+          <span class="status-${b.status}">${b.status}</span>
+        </p>
+      </div>
+
+      ${b.status === 'booked' ? `
+        <button class="btn btn-danger" onclick="cancelBooking('${b._id}')">
+          Cancel Booking
+        </button>
+      ` : ``}
+    </div>
+  `).join('');
+}
+
+async function cancelBooking(id) {
+  if (!confirm('Cancel this booking?')) return;
+
+  const token = localStorage.getItem('token');
+  const res = await fetch(`/bookings/cancel/${id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (res.ok) {
+    alert('Booking cancelled');
+    loadBookings();
+  } else {
+    alert('Failed to cancel booking');
+  }
+}
+</script>
 
 </body>
 </html>

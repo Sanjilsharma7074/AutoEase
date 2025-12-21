@@ -66,8 +66,8 @@
 
   <main>
     <div class="otp-container">
-      <h2>Verify Your Email</h2>
-      <p>We've sent a 6-digit OTP to your email address.</p>
+      <h2>Verify Your Account</h2>
+      <p id="sentInfo">We've sent a 6-digit OTP to your email address.</p>
       <div id="message" class="message"></div>
 
       <form id="otpForm">
@@ -91,8 +91,18 @@
   </main>
 
   <script>
-    const email = new URLSearchParams(window.location.search).get("email");
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get("email");
+    const phone = params.get("phone");
     let timeLeft = 600; // 10 minutes
+
+    // Update the UI to indicate where OTP was sent
+    const sentInfoEl = document.getElementById('sentInfo');
+    if (phone) {
+      sentInfoEl.textContent = `We've sent a 6-digit OTP to ${phone}.`;
+    } else if (email) {
+      sentInfoEl.textContent = `We've sent a 6-digit OTP to ${email}.`;
+    }
 
     // Timer countdown
     const timerInterval = setInterval(() => {
@@ -129,10 +139,11 @@
       if (otp.length !== 6) return showMessage("Please enter all 6 digits", "error");
 
       try {
+        const body = phone ? { phone, otp } : { email, otp };
         const res = await fetch("/auth/verify-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, otp })
+          body: JSON.stringify(body)
         });
         const data = await res.json();
         if (res.ok) {
@@ -150,21 +161,26 @@
 
     // Resend OTP
     document.getElementById("resendBtn").addEventListener("click", async () => {
+      const btn = document.getElementById('resendBtn');
+      btn.disabled = true;
       try {
+        const body = phone ? { phone } : { email };
         const res = await fetch("/auth/resend-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
+          body: JSON.stringify(body)
         });
         const data = await res.json();
         if (res.ok) {
-          showMessage("OTP resent to your email", "success");
+          showMessage(data.message || "OTP resent", "success");
           timeLeft = 600;
         } else {
           showMessage(data.message, "error");
         }
       } catch {
         showMessage("An error occurred. Please try again.", "error");
+      } finally {
+        btn.disabled = false;
       }
     });
   </script>

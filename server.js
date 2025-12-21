@@ -34,6 +34,7 @@ app.use(passport.session());
 const userRoutes = require("./Routes/userRoutes");
 const carRoutes = require("./Routes/carRoutes");
 const bookingRoutes = require("./Routes/bookingRoutes");
+const adminRoutes = require("./Routes/adminRoutes");
 
 const authRoutes = require("./Routes/authRoutes");
 const viewRoutes = require("./Routes/viewRoutes");
@@ -44,13 +45,14 @@ app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/api/cars", carRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/admin", adminRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log(err));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const http = require("http");
 const { Server } = require("socket.io");
 

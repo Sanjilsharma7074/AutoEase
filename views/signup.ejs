@@ -59,11 +59,19 @@
           </div>
 
           <div class="form-group">
+            <label>Phone (optional — include country code, e.g. +1...)</label>
+            <input type="tel" id="phone" placeholder="+1234567890" />
+          </div>
+
+          <div class="form-group">
             <label>Password</label>
             <input type="password" id="password" required />
           </div>
 
-          <button type="submit" class="btn btn-primary">Sign Up</button>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button type="button" id="signupEmailBtn" class="btn btn-primary">Send OTP via Email</button>
+            <button type="button" id="signupSmsBtn" class="btn btn-primary">Send OTP via SMS</button>
+          </div>
         </form>
 
         <p class="auth-link">
@@ -83,45 +91,68 @@
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
-document.getElementById("signupForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const name = document.getElementById("name").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const role = "user";
+(() => {
+  const nameEl = document.getElementById("name");
+  const emailEl = document.getElementById("email");
+  const phoneEl = document.getElementById("phone");
+  const passwordEl = document.getElementById("password");
   const messageDiv = document.getElementById("message");
 
-  if (email.toLowerCase() === "sanjilsharma456@gmail.com") {
-    messageDiv.innerHTML =
-      '<div class="error">This email is reserved for the Super Administrator account.</div>';
-    setTimeout(() => location.href = "/login", 3000);
-    return;
-  }
+  const signupEmailBtn = document.getElementById('signupEmailBtn');
+  const signupSmsBtn = document.getElementById('signupSmsBtn');
 
-  try {
-    const res = await fetch("/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, role })
-    });
+  const disableBtns = (v) => { signupEmailBtn.disabled = signupSmsBtn.disabled = v; };
 
-    const data = await res.json();
+  const sendRequest = async (method) => {
+    // method: 'email' or 'sms'
+    const name = nameEl.value;
+    const email = emailEl.value;
+    const phone = phoneEl.value || undefined;
+    const password = passwordEl.value;
+    const role = 'user';
 
-    if (res.ok) {
-      messageDiv.innerHTML =
-        '<div class="success">OTP sent to your email. Redirecting...</div>';
-      setTimeout(() => {
-        location.href = `/verify-otp?email=${encodeURIComponent(email)}`;
-      }, 2000);
-    } else {
-      messageDiv.innerHTML = `<div class="error">${data.message}</div>`;
+    if (email.toLowerCase() === 'sanjilsharma456@gmail.com') {
+      messageDiv.innerHTML = '<div class="error">This email is reserved for the Super Administrator account.</div>';
+      setTimeout(() => location.href = '/login', 3000);
+      return;
     }
-  } catch {
-    messageDiv.innerHTML =
-      '<div class="error">Network error. Please try again.</div>';
-  }
-});
+
+    disableBtns(true);
+    const prevEmailText = signupEmailBtn.textContent;
+    const prevSmsText = signupSmsBtn.textContent;
+    if (method === 'email') signupEmailBtn.textContent = 'Sending...';
+    else signupSmsBtn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch('/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, password, role, method })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        messageDiv.innerHTML = `<div class="success">${data.message}</div>`;
+        setTimeout(() => {
+          if (method === 'sms' && phone) window.location.href = `/verify-otp?phone=${encodeURIComponent(phone)}`;
+          else window.location.href = `/verify-otp?email=${encodeURIComponent(email)}`;
+        }, 900);
+      } else {
+        messageDiv.innerHTML = `<div class="error">${data.message}</div>`;
+        signupEmailBtn.textContent = prevEmailText;
+        signupSmsBtn.textContent = prevSmsText;
+        disableBtns(false);
+      }
+    } catch (err) {
+      messageDiv.innerHTML = '<div class="error">Network error. Please try again.</div>';
+      signupEmailBtn.textContent = prevEmailText;
+      signupSmsBtn.textContent = prevSmsText;
+      disableBtns(false);
+    }
+  };
+
+  signupEmailBtn.addEventListener('click', () => sendRequest('email'));
+  signupSmsBtn.addEventListener('click', () => sendRequest('sms'));
+})();
 </script>
 
 </body>

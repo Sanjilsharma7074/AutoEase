@@ -1,0 +1,19 @@
+/* Admin specific small styles */
+.admin-car-card{display:flex;gap:12px;background:#fff;border-radius:12px;padding:12px;box-shadow:0 10px 30px rgba(2,6,23,0.06);align-items:stretch}
+.admin-car-card .car-media{width:200px;height:130px;background-size:cover;background-position:center;border-radius:8px;flex-shrink:0}
+.admin-car-card .car-meta{flex:1;display:flex;flex-direction:column;justify-content:space-between}
+.admin-car-card h3{margin:0;font-size:1.1rem}
+.admin-car-card .car-type{color:#6b7280;font-size:.9rem}
+.admin-car-card .car-price{font-weight:700;color:#0E5AE0}
+.admin-car-card .car-actions{display:flex;gap:8px;margin-top:8px}
+
+.admin-booking-card{display:flex;justify-content:space-between;gap:12px;background:#fff;border-radius:10px;padding:14px;box-shadow:0 8px 20px rgba(2,6,23,0.05);align-items:center}
+.admin-booking-card .booking-info p{margin:6px 0;color:#374151}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+.btn-primary{background:#0E5AE0;color:#fff}
+.btn-danger{background:#e63946;color:#fff}
+.btn-small{padding:8px 12px;min-width:120px;max-width:160px}
+.btn[disabled]{opacity:0.6;cursor:not-allowed}
+
+@media(max-width:700px){.admin-car-card{flex-direction:column}.admin-car-card .car-media{width:100%;height:160px}}

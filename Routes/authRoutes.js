@@ -3,12 +3,13 @@ const router = express.Router();
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const { generateOTP, sendOTPEmail } = require("../services/emailService");
+const { sendOtpSms, initTwilio } = require("../services/twilioService");
 const passport = require("passport");
 
 // Step 1: Signup - Send OTP
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, phone } = req.body;
 
     // Block super admin email from signup
     const SUPER_ADMIN_EMAIL = "sanjilsharma456@gmail.com";
@@ -19,11 +20,21 @@ router.post("/signup", async (req, res) => {
       });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already registered" });
-    }
+    // Check if user already exists by email or phone
+   // Build query dynamically
+const query = [];
+if (email) query.push({ email });
+if (phone) query.push({ phone });
+
+if (query.length > 0) {
+  const existingUser = await User.findOne({ $or: query });
+  if (existingUser) {
+    return res.status(400).json({
+      message: "An account with this email or phone already exists",
+    });
+  }
+}
+
 
     // Force role to be 'user' for all signups
     const userRole = "user";
@@ -36,6 +47,7 @@ router.post("/signup", async (req, res) => {
     const user = new User({
       name,
       email,
+      phone,
       password,
       role: userRole,
       otp,
@@ -45,12 +57,40 @@ router.post("/signup", async (req, res) => {
 
     await user.save();
 
-    // Send OTP email
-    await sendOTPEmail(email, otp);
+    // Send OTP according to requested method (default: email)
+    const method = (req.body.method || 'email').toLowerCase();
+    let sentVia = 'email';
+
+    if (method === 'sms') {
+      if (!phone) {
+        return res.status(400).json({ message: 'Phone number required for SMS OTP' });
+      }
+      if (!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER)) {
+        return res.status(503).json({ message: 'Twilio not configured. Cannot send SMS OTP.' });
+      }
+      try {
+        await sendOtpSms(phone, otp);
+        sentVia = 'sms';
+      } catch (err) {
+        console.warn('Failed to send SMS OTP:', err && err.message);
+        return res.status(500).json({ message: 'Failed to send SMS OTP. Try email instead.' });
+      }
+    } else {
+      // default to email
+      if (!email) return res.status(400).json({ message: 'Email required for email OTP' });
+      try {
+        await sendOTPEmail(email, otp);
+        sentVia = 'email';
+      } catch (err) {
+        console.warn('Failed to send Email OTP:', err && err.message);
+        return res.status(500).json({ message: 'Failed to send email OTP' });
+      }
+    }
 
     res.status(201).json({
-      message: "OTP sent to your email. Please verify to complete signup.",
+      message: `OTP sent via ${sentVia}. Please verify to complete signup.`,
       email: email,
+      phone: phone,
     });
   } catch (err) {
     console.error(err);
@@ -61,9 +101,12 @@ router.post("/signup", async (req, res) => {
 // Step 2: Verify OTP
 router.post("/verify-otp", async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email, phone, otp } = req.body;
 
-    const user = await User.findOne({ email });
+    const query = email ? { email } : phone ? { phone } : null;
+    if (!query) return res.status(400).json({ message: "Provide email or phone and OTP" });
+
+    const user = await User.findOne(query);
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
@@ -80,7 +123,7 @@ router.post("/verify-otp", async (req, res) => {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
-    // Mark email as verified and clear OTP
+    // Mark account as verified and clear OTP
     user.emailVerified = true;
     user.otp = null;
     user.otpExpiry = null;
@@ -94,7 +137,7 @@ router.post("/verify-otp", async (req, res) => {
     );
 
     res.json({
-      message: "Email verified successfully",
+      message: "Verified successfully",
       token,
       user: {
         id: user._id,
@@ -112,15 +155,17 @@ router.post("/verify-otp", async (req, res) => {
 // Resend OTP
 router.post("/resend-otp", async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, phone } = req.body;
+    const query = email ? { email } : phone ? { phone } : null;
+    if (!query) return res.status(400).json({ message: "Provide email or phone to resend OTP" });
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne(query);
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
 
     if (user.emailVerified) {
-      return res.status(400).json({ message: "Email already verified" });
+      return res.status(400).json({ message: "Account already verified" });
     }
 
     // Generate new OTP
@@ -131,10 +176,22 @@ router.post("/resend-otp", async (req, res) => {
     user.otpExpiry = otpExpiry;
     await user.save();
 
-    // Send OTP email
-    await sendOTPEmail(email, otp);
+    // Send via SMS when possible
+    let sentVia = "email";
+    if (user.phone && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      try {
+        await sendOtpSms(user.phone, otp);
+        sentVia = "sms";
+      } catch (err) {
+        console.warn("Failed to send SMS OTP, falling back to email:", err && err.message);
+        await sendOTPEmail(user.email, otp);
+        sentVia = "email-fallback";
+      }
+    } else {
+      await sendOTPEmail(user.email, otp);
+    }
 
-    res.json({ message: "New OTP sent to your email" });
+    res.json({ message: `New OTP sent via ${sentVia}` });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });

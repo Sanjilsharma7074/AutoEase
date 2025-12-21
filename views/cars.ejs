@@ -52,8 +52,8 @@
     <main>
       <div class="container">
         <div class="page-header">
-          <h1>Available Cars</h1>
-          <p>Find your perfect ride — filtered to your needs.</p>
+          <h1 style="font-size: 50px;font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif ;">Available Cars</h1>
+          <p style="font-style: italic;margin-left: -10px;">Find your perfect ride — filtered to your needs.</p>
         </div>
 
         <div class="layout-grid">
@@ -66,7 +66,7 @@
                   <option value="">All Types</option>
                 </select>
 
-                <label style="margin-top:12px"><strong>Price</strong></label>
+                <label style="margin-top:0px"><strong>Price</strong></label>
                 <select id="priceFilter">
                   <option value="">Any</option>
                   <option value="0-50">$0 - $50</option>
@@ -74,22 +74,22 @@
                   <option value="100-99999">$100+</option>
                 </select>
 
-                <label style="margin-top:12px"><strong>Location</strong></label>
+                <label style="margin-top:0px"><strong>Location</strong></label>
                 <input id="locationInput" type="text" placeholder="City or area" />
                 <div class="filter-row" style="margin-top:8px">
                   <button class="btn-apply" onclick="applyLocationFilter()">Search</button>
-                  <button class="btn-reset" onclick="detectLocationAndFilter()">Use my location</button>
+                  <button class="btn-reset" onclick="detectLocationAndFilter()" style="margin-right: 15px;">Use my location</button>
                 </div>
 
-                <label style="margin-top:12px"><strong>Nearby</strong></label>
+                <!-- <label style="margin-top:12px"><strong>Nearby</strong></label>
                 <div class="filter-row">
                   <input id="radiusKm" type="number" min="1" max="200" placeholder="km" />
                   <select id="radiusUnit"><option value="km">km</option></select>
-                </div>
+                </div> -->
 
-                <div style="margin-top:16px;display:flex;gap:8px">
-                  <button class="btn-apply" onclick="applyRadiusAndFilters()">Apply</button>
-                  <button class="btn-reset" onclick="resetFilters()">Reset</button>
+                <div style="margin-top:8px;display:flex;gap:8px">
+                  <button class="btn-apply" onclick="applyRadiusAndFilters()" style="background-color: green;">Apply</button>
+                  <button class="btn-reset" onclick="resetFilters()" >Reset</button>
                 </div>
               </div>
             </div>

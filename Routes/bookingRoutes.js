@@ -83,11 +83,22 @@ router.put("/cancel/:bookingId", auth(), async (req, res) => {
     const booking = await Booking.findById(req.params.bookingId);
 
     if (!booking) return res.status(404).json({ message: "Booking not found" });
+    // Cannot cancel if booking is not in 'booked' state
+    if (booking.status !== 'booked') {
+      return res.status(400).json({ message: 'Cannot cancel this booking' });
+    }
 
-    // Only booking owner or admin can cancel
+    // Cannot cancel if booking has already started
+    const now = new Date();
+    if (booking.startDate && new Date(booking.startDate) <= now) {
+      return res.status(400).json({ message: 'Cannot cancel a booking that has already started or completed' });
+    }
+
+    // Only booking owner, admin or superadmin can cancel
     if (
       booking.userId.toString() !== req.user.id &&
-      req.user.role !== "admin"
+      req.user.role !== "admin" &&
+      req.user.role !== "superadmin"
     ) {
       return res.status(403).json({ message: "Access denied" });
     }
