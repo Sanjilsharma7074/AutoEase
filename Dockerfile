@@ -8,8 +8,6 @@ ENV NODE_ENV=production
 
 # Install app dependencies
 COPY package*.json ./
-# Copy env file
-COPY .env ./
 
 RUN npm ci --omit=dev || npm install --production
 
