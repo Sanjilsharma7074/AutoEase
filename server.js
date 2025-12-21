@@ -46,7 +46,13 @@ app.use("/api/cars", carRoutes);
 app.use("/api/bookings", bookingRoutes);
 
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(this , {
+    serverSelectionTimeoutMS: 30000,    // Wait 30 seconds before timing out
+    socketTimeoutMS: 45000,              // 45 second timeout for socket operations
+    connectTimeoutMS: 30000,             // 30 seconds to connect
+    retryWrites: true,
+    maxPoolSize: 10,
+  })
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log(err));
 
