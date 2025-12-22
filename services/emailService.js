@@ -1,15 +1,34 @@
 const nodemailer = require("nodemailer");
 
-// Configure your email service (Gmail, SendGrid, etc.)
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // Use TLS (true would be SSL on port 465)
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD, // Use App Password for Gmail
-  },
-});
+// Prefer SendGrid in cloud (Render) if available; else use Gmail STARTTLS
+const useSendGrid = !!process.env.SENDGRID_API_KEY;
+
+const transporter = useSendGrid
+  ? nodemailer.createTransport({
+      host: "smtp.sendgrid.net",
+      port: 587,
+      secure: false,
+      auth: {
+        user: "apikey",
+        pass: process.env.SENDGRID_API_KEY,
+      },
+      connectionTimeout: 15000,
+    })
+  : nodemailer.createTransport({
+      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // STARTTLS
+      requireTLS: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD, // 16-char Gmail App Password
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+      connectionTimeout: 15000,
+    });
 
 // Generate 6-digit OTP
 const generateOTP = () => {
