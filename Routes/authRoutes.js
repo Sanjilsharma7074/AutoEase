@@ -46,12 +46,27 @@ router.post("/signup", async (req, res) => {
     await user.save();
 
     // Send OTP email
-    await sendOTPEmail(email, otp);
-
-    res.status(201).json({
-      message: "OTP sent to your email. Please verify to complete signup.",
-      email: email,
-    });
+    try {
+      await sendOTPEmail(email, otp);
+      res.status(201).json({
+        message: "OTP sent to your email. Please verify to complete signup.",
+        email: email,
+      });
+    } catch (emailErr) {
+      console.error(
+        "OTP email send failed:",
+        emailErr.message,
+        "| EMAIL_USER env var:",
+        process.env.EMAIL_USER ? "SET" : "MISSING"
+      );
+      // Delete temp user since we couldn't send OTP
+      await User.findByIdAndDelete(user._id);
+      return res.status(500).json({
+        message:
+          "Failed to send OTP email. Please check your email configuration and try again.",
+        error: process.env.NODE_ENV === "development" ? emailErr.message : null,
+      });
+    }
   } catch (err) {
     console.error(err);
     res.status(400).json({ message: err.message });
