@@ -106,7 +106,9 @@
               <label for="password">Password:</label>
               <input type="password" id="password" name="password" required />
             </div>
-            <button type="submit" class="btn btn-primary">Sign Up</button>
+            <button type="submit" id="signupBtn" class="btn btn-primary">
+              Sign Up
+            </button>
           </form>
           <p class="auth-link">
             Already have an account? <a href="/login">Login here</a>
@@ -125,57 +127,69 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/main.js"></script>
     <script>
-      document
-        .getElementById("signupForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
+      const signupForm = document.getElementById("signupForm");
+      const signupBtn = document.getElementById("signupBtn");
 
-          const name = document.getElementById("name").value;
-          const email = document.getElementById("email").value;
-          const password = document.getElementById("password").value;
-          const role = "user"; // All signups are customers now
-          const messageDiv = document.getElementById("message");
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-          // Block super admin email from signup
-          if (email.toLowerCase() === "sanjilsharma456@gmail.com") {
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const role = "user"; // All signups are customers now
+        const messageDiv = document.getElementById("message");
+
+        // Block super admin email from signup
+        if (email.toLowerCase() === "sanjilsharma456@gmail.com") {
+          messageDiv.innerHTML =
+            '<div class="error">This email is reserved for the Super Administrator account. Please use the login page if you have credentials.</div>';
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 3000);
+          return;
+        }
+
+        // Prevent double submits
+        signupBtn.disabled = true;
+        const originalText = signupBtn.textContent;
+        signupBtn.textContent = "Sending OTP...";
+        messageDiv.innerHTML =
+          '<div class="info">Sending OTP, please wait...</div>';
+
+        try {
+          const response = await fetch("/auth/signup", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name, email, password, role }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
             messageDiv.innerHTML =
-              '<div class="error">This email is reserved for the Super Administrator account. Please use the login page if you have credentials.</div>';
+              '<div class="success">OTP sent to your email! Please verify to complete signup.</div>';
+            // Redirect to OTP verification page
             setTimeout(() => {
-              window.location.href = "/login";
-            }, 3000);
-            return;
+              window.location.href = `/verify-otp?email=${encodeURIComponent(
+                email
+              )}`;
+            }, 2000);
+          } else {
+            messageDiv.innerHTML = `<div class="error">${
+              data.message || "Signup failed"
+            }</div>`;
+            signupBtn.disabled = false;
+            signupBtn.textContent = originalText;
           }
-
-          try {
-            const response = await fetch("/auth/signup", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ name, email, password, role }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-              messageDiv.innerHTML =
-                '<div class="success">OTP sent to your email! Please verify to complete signup.</div>';
-              // Redirect to OTP verification page
-              setTimeout(() => {
-                window.location.href = `/verify-otp?email=${encodeURIComponent(
-                  email
-                )}`;
-              }, 2000);
-            } else {
-              messageDiv.innerHTML = `<div class="error">${
-                data.message || "Signup failed"
-              }</div>`;
-            }
-          } catch (error) {
-            messageDiv.innerHTML =
-              '<div class="error">Network error. Please try again.</div>';
-          }
-        });
+        } catch (error) {
+          messageDiv.innerHTML =
+            '<div class="error">Network error. Please try again.</div>';
+          signupBtn.disabled = false;
+          signupBtn.textContent = originalText;
+        }
+      });
 
       // Optional: If you want to provide feedback when Google creds are missing,
       // we can probe a lightweight status endpoint instead of hiding the button.
