@@ -73,6 +73,12 @@ const { Server } = require("socket.io");
 
 // Create HTTP server and attach Socket.IO
 const server = http.createServer(app);
+
+// Set server timeout to 60 seconds for long-running operations (like email sending)
+server.timeout = 60000; // 60 seconds
+server.keepAliveTimeout = 65000; // 65 seconds (should be higher than timeout)
+server.headersTimeout = 66000; // 66 seconds (should be higher than keepAliveTimeout)
+
 const io = new Server(server, {
   cors: {
     origin: "*",

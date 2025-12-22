@@ -19,10 +19,18 @@ router.post("/signup", async (req, res) => {
       });
     }
 
-    // Check if user already exists
+    // Check if user already exists (including unverified users)
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already registered" });
+      // If user exists but is not verified and OTP is expired, delete and allow re-signup
+      if (!existingUser.emailVerified && existingUser.otpExpiry && new Date() > existingUser.otpExpiry) {
+        console.log(`Deleting expired unverified user: ${email}`);
+        await User.findByIdAndDelete(existingUser._id);
+      } else if (existingUser.emailVerified) {
+        return res.status(400).json({ message: "Email already registered and verified. Please login." });
+      } else {
+        return res.status(400).json({ message: "Email already registered. Please verify your email with the OTP sent earlier, or wait for it to expire." });
+      }
     }
 
     // Force role to be 'user' for all signups
@@ -32,7 +40,27 @@ router.post("/signup", async (req, res) => {
     const otp = generateOTP();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes validity
 
-    // Create temporary user document
+    // IMPORTANT: Send OTP email FIRST before creating user in database
+    try {
+      await sendOTPEmail(email, otp);
+      console.log(`OTP sent successfully to ${email}`);
+    } catch (emailErr) {
+      console.error(
+        "OTP email send failed:",
+        emailErr.message,
+        "| EMAIL_USER env var:",
+        process.env.EMAIL_USER ? "SET" : "MISSING",
+        "| SENDGRID_API_KEY:",
+        process.env.SENDGRID_API_KEY ? "SET" : "MISSING"
+      );
+      return res.status(500).json({
+        message:
+          "Failed to send OTP email. Please check your email configuration and try again.",
+        error: process.env.NODE_ENV === "development" ? emailErr.message : "Email service unavailable",
+      });
+    }
+
+    // Only create user in database AFTER email is successfully sent
     const user = new User({
       name,
       email,
@@ -44,31 +72,14 @@ router.post("/signup", async (req, res) => {
     });
 
     await user.save();
+    console.log(`User created successfully: ${email}`);
 
-    // Send OTP email
-    try {
-      await sendOTPEmail(email, otp);
-      res.status(201).json({
-        message: "OTP sent to your email. Please verify to complete signup.",
-        email: email,
-      });
-    } catch (emailErr) {
-      console.error(
-        "OTP email send failed:",
-        emailErr.message,
-        "| EMAIL_USER env var:",
-        process.env.EMAIL_USER ? "SET" : "MISSING"
-      );
-      // Delete temp user since we couldn't send OTP
-      await User.findByIdAndDelete(user._id);
-      return res.status(500).json({
-        message:
-          "Failed to send OTP email. Please check your email configuration and try again.",
-        error: process.env.NODE_ENV === "development" ? emailErr.message : null,
-      });
-    }
+    res.status(201).json({
+      message: "OTP sent to your email. Please verify to complete signup.",
+      email: email,
+    });
   } catch (err) {
-    console.error(err);
+    console.error("Signup error:", err);
     res.status(400).json({ message: err.message });
   }
 });
@@ -142,12 +153,22 @@ router.post("/resend-otp", async (req, res) => {
     const otp = generateOTP();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
+    // Send OTP email FIRST before updating database
+    try {
+      await sendOTPEmail(email, otp);
+      console.log(`OTP resent successfully to ${email}`);
+    } catch (emailErr) {
+      console.error("Resend OTP email failed:", emailErr.message);
+      return res.status(500).json({
+        message: "Failed to resend OTP email. Please try again.",
+        error: process.env.NODE_ENV === "development" ? emailErr.message : "Email service unavailable",
+      });
+    }
+
+    // Only update database after email is successfully sent
     user.otp = otp;
     user.otpExpiry = otpExpiry;
     await user.save();
-
-    // Send OTP email
-    await sendOTPEmail(email, otp);
 
     res.json({ message: "New OTP sent to your email" });
   } catch (err) {
@@ -455,6 +476,26 @@ router.delete("/admin/:id", auth(["superadmin"]), async (req, res) => {
   } catch (err) {
     console.error("Error deleting admin:", err);
     res.status(500).json({ message: "Failed to delete admin account" });
+  }
+});
+
+// Cleanup expired unverified users (can be called via cron job or manually)
+router.post("/cleanup-expired-users", async (req, res) => {
+  try {
+    const now = new Date();
+    const result = await User.deleteMany({
+      emailVerified: false,
+      otpExpiry: { $lt: now },
+    });
+
+    console.log(`Cleaned up ${result.deletedCount} expired unverified users`);
+    res.json({
+      message: `Successfully cleaned up ${result.deletedCount} expired unverified users`,
+      count: result.deletedCount,
+    });
+  } catch (err) {
+    console.error("Error cleaning up expired users:", err);
+    res.status(500).json({ message: "Failed to cleanup expired users" });
   }
 });
 

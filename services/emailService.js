@@ -12,7 +12,9 @@ const transporter = useSendGrid
         user: "apikey",
         pass: process.env.SENDGRID_API_KEY,
       },
-      connectionTimeout: 15000,
+      connectionTimeout: 30000, // 30 seconds for cloud environments
+      socketTimeout: 30000,
+      greetingTimeout: 30000,
     })
   : nodemailer.createTransport({
       service: "gmail",
@@ -27,7 +29,9 @@ const transporter = useSendGrid
       tls: {
         rejectUnauthorized: false,
       },
-      connectionTimeout: 15000,
+      connectionTimeout: 30000, // 30 seconds for cloud environments
+      socketTimeout: 30000,
+      greetingTimeout: 30000,
     });
 
 // Generate 6-digit OTP
@@ -37,8 +41,17 @@ const generateOTP = () => {
 
 // Send OTP email
 const sendOTPEmail = async (email, otp) => {
+  // Verify transporter configuration before attempting to send
+  try {
+    await transporter.verify();
+    console.log("SMTP connection verified successfully");
+  } catch (verifyError) {
+    console.error("SMTP verification failed:", verifyError.message);
+    throw new Error(`Email service not configured properly: ${verifyError.message}`);
+  }
+
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: useSendGrid ? process.env.EMAIL_USER || 'noreply@carrental.com' : process.env.EMAIL_USER,
     to: email,
     subject: "Email Verification OTP - Car Rental Service",
     html: `
@@ -58,11 +71,17 @@ const sendOTPEmail = async (email, otp) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully:", info.messageId);
     return true;
   } catch (error) {
-    console.error("Email sending error:", error);
-    throw new Error("Failed to send OTP email");
+    console.error("Email sending error:", {
+      message: error.message,
+      code: error.code,
+      response: error.response,
+      stack: error.stack
+    });
+    throw new Error(`Failed to send OTP email: ${error.message}`);
   }
 };
 

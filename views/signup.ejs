@@ -154,16 +154,23 @@
         const originalText = signupBtn.textContent;
         signupBtn.textContent = "Sending OTP...";
         messageDiv.innerHTML =
-          '<div class="info">Sending OTP, please wait...</div>';
+          '<div class="info">Sending OTP, please wait... This may take up to 30 seconds.</div>';
 
         try {
+          // Add timeout for fetch request (40 seconds to account for server processing)
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 40000);
+
           const response = await fetch("/auth/signup", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ name, email, password, role }),
+            signal: controller.signal,
           });
+
+          clearTimeout(timeoutId);
 
           const data = await response.json();
 
@@ -184,8 +191,13 @@
             signupBtn.textContent = originalText;
           }
         } catch (error) {
-          messageDiv.innerHTML =
-            '<div class="error">Network error. Please try again.</div>';
+          if (error.name === 'AbortError') {
+            messageDiv.innerHTML =
+              '<div class="error">Request timeout. The server is taking too long to respond. Please check your email configuration or try again later.</div>';
+          } else {
+            messageDiv.innerHTML =
+              '<div class="error">Network error. Please check your internet connection and try again.</div>';
+          }
           signupBtn.disabled = false;
           signupBtn.textContent = originalText;
         }

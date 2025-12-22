@@ -201,23 +201,47 @@
       document
         .getElementById("resendBtn")
         .addEventListener("click", async () => {
+          const resendBtn = document.getElementById("resendBtn");
+          resendBtn.disabled = true;
+          const originalText = resendBtn.textContent;
+          resendBtn.textContent = "Sending...";
+
           try {
+            // Add timeout for fetch request (40 seconds)
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 40000);
+
             const response = await fetch("/auth/resend-otp", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ email }),
+              signal: controller.signal,
             });
+
+            clearTimeout(timeoutId);
 
             const data = await response.json();
 
             if (response.ok) {
-              showMessage("OTP resent to your email", "success");
+              showMessage("OTP resent to your email. Please check your inbox.", "success");
               timeLeft = 600;
+              resendBtn.textContent = originalText;
+              setTimeout(() => {
+                resendBtn.disabled = false;
+              }, 30000); // Prevent spam - re-enable after 30 seconds
             } else {
               showMessage(data.message, "error");
+              resendBtn.disabled = false;
+              resendBtn.textContent = originalText;
             }
           } catch (error) {
-            showMessage("An error occurred. Please try again.", "error");
+            if (error.name === 'AbortError') {
+              showMessage("Request timeout. Please try again.", "error");
+            } else {
+              showMessage("An error occurred. Please try again.", "error");
+            }
+            resendBtn.disabled = false;
+            resendBtn.textContent = originalText;
           }
         });
 
