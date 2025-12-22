@@ -19,14 +19,14 @@ const transporter = useSendGrid
   : nodemailer.createTransport({
       service: "gmail",
       host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // STARTTLS
-      requireTLS: true,
+      port: 465,
+      secure: true, // SSL
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD, // 16-char Gmail App Password
       },
       tls: {
+        // Allow self-signed/strict TLS in some managed environments
         rejectUnauthorized: false,
       },
       connectionTimeout: 30000, // 30 seconds for cloud environments
@@ -46,8 +46,8 @@ const sendOTPEmail = async (email, otp) => {
     await transporter.verify();
     console.log("SMTP connection verified successfully");
   } catch (verifyError) {
-    console.error("SMTP verification failed:", verifyError.message);
-    throw new Error(`Email service not configured properly: ${verifyError.message}`);
+    // Do not fail on verification; attempt to send anyway
+    console.warn("SMTP verification failed, attempting to send anyway:", verifyError.message);
   }
 
   const mailOptions = {
