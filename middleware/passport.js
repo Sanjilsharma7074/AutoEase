@@ -2,6 +2,29 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/User");
 
+// Resolve absolute callback URL for Render/production deployments
+function resolveGoogleCallbackURL() {
+  // Prefer explicit env var
+  if (process.env.GOOGLE_CALLBACK_URL) {
+    return process.env.GOOGLE_CALLBACK_URL;
+  }
+  // Render exposes external URL in RENDER_EXTERNAL_URL
+  const base =
+    process.env.RENDER_EXTERNAL_URL ||
+    process.env.APP_BASE_URL ||
+    process.env.BASE_URL;
+  if (base) {
+    try {
+      const u = new URL("/auth/google/callback", base);
+      return u.toString();
+    } catch (_) {
+      // fall through to relative path
+    }
+  }
+  // Fallback to relative path (works locally)
+  return "/auth/google/callback";
+}
+
 // Only configure Google OAuth if credentials are available
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(
@@ -9,7 +32,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "/auth/google/callback",
+        callbackURL: resolveGoogleCallbackURL(),
         passReqToCallback: true,
       },
       async (req, accessToken, refreshToken, profile, done) => {

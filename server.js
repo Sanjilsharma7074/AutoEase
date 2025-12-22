@@ -17,12 +17,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Session configuration for Passport
+// Trust reverse proxy headers (required for secure cookies on Render/Heroku/etc.)
+app.set("trust proxy", 1);
+const isProd =
+  process.env.NODE_ENV === "production" || !!process.env.RENDER_EXTERNAL_URL;
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "your-secret-key",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, httpOnly: true }, // Set secure: true in production with HTTPS
+    cookie: {
+      // Use secure cookies when deployed behind HTTPS
+      secure: !!isProd,
+      httpOnly: true,
+      // Lax is sufficient for top-level OAuth redirects
+      sameSite: "lax",
+    },
   })
 );
 
