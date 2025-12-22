@@ -59,14 +59,23 @@ const sendOTPEmail = async (email, otp) => {
 
   // Prefer SendGrid REST API if available
   if (sgMail) {
-    const from = process.env.EMAIL_USER || "noreply@autoease.app"; // must be a verified sender in SendGrid
+    // Use a verified SendGrid sender identity. Prefer SENDGRID_FROM, fallback to EMAIL_USER.
+    const from =
+      process.env.SENDGRID_FROM ||
+      process.env.EMAIL_USER ||
+      "noreply@autoease.app"; // must be verified in SendGrid
+
     const msg = { to: email, from, subject, html };
     try {
       const [response] = await sgMail.send(msg);
       console.log("SendGrid email sent:", response?.statusCode);
       return true;
     } catch (error) {
-      console.error("SendGrid send error:", error?.response?.body || error.message);
+      const sgErr = error?.response?.body || error.message;
+      console.error("SendGrid send error:", sgErr);
+      if (sgErr?.errors?.[0]?.message) {
+        throw new Error(`Failed to send OTP email via SendGrid: ${sgErr.errors[0].message}`);
+      }
       throw new Error(`Failed to send OTP email via SendGrid: ${error.message}`);
     }
   }
