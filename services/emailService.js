@@ -1,34 +1,53 @@
 const nodemailer = require("nodemailer");
 
-// Prefer SendGrid in cloud (Render) if available; else use Gmail STARTTLS
+// Multi-provider email support: Brevo (free), Gmail (local dev only), or SendGrid
+const useBrevo = !!process.env.BREVO_SMTP_KEY;
 const useSendGrid = !!process.env.SENDGRID_API_KEY;
 
-const transporter = useSendGrid
-  ? nodemailer.createTransport({
-      host: "smtp.sendgrid.net",
-      port: 587,
-      secure: false,
-      auth: {
-        user: "apikey",
-        pass: process.env.SENDGRID_API_KEY,
-      },
-      connectionTimeout: 15000,
-    })
-  : nodemailer.createTransport({
-      service: "gmail",
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // STARTTLS
-      requireTLS: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD, // 16-char Gmail App Password
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-      connectionTimeout: 15000,
-    });
+let transporter;
+
+if (useBrevo) {
+  // Brevo (formerly Sendinblue) - 300 emails/day FREE forever
+  transporter = nodemailer.createTransport({
+    host: "smtp-relay.brevo.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.BREVO_SMTP_USER || process.env.EMAIL_USER,
+      pass: process.env.BREVO_SMTP_KEY,
+    },
+    connectionTimeout: 15000,
+  });
+} else if (useSendGrid) {
+  // SendGrid
+  transporter = nodemailer.createTransport({
+    host: "smtp.sendgrid.net",
+    port: 587,
+    secure: false,
+    auth: {
+      user: "apikey",
+      pass: process.env.SENDGRID_API_KEY,
+    },
+    connectionTimeout: 15000,
+  });
+} else {
+  // Gmail (works locally, may fail on cloud platforms due to SMTP blocking)
+  transporter = nodemailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    requireTLS: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+    connectionTimeout: 15000,
+  });
+}
 
 // Generate 6-digit OTP
 const generateOTP = () => {
@@ -59,10 +78,16 @@ const sendOTPEmail = async (email, otp) => {
 
   try {
     await transporter.sendMail(mailOptions);
+    console.log(`✅ OTP email sent successfully to ${email}`);
     return true;
   } catch (error) {
-    console.error("Email sending error:", error);
-    throw new Error("Failed to send OTP email");
+    console.error("❌ Email sending error:", error.message);
+    console.error("Config:", {
+      useBrevo: !!process.env.BREVO_SMTP_KEY,
+      useSendGrid: !!process.env.SENDGRID_API_KEY,
+      useGmail: !process.env.BREVO_SMTP_KEY && !process.env.SENDGRID_API_KEY,
+    });
+    throw new Error("Failed to send OTP email: " + error.message);
   }
 };
 
