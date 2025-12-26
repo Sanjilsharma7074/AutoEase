@@ -6,47 +6,55 @@ const useSendGrid = !!process.env.SENDGRID_API_KEY;
 
 let transporter;
 
-if (useBrevo) {
-  // Brevo (formerly Sendinblue) - 300 emails/day FREE forever
-  transporter = nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.BREVO_SMTP_USER || process.env.EMAIL_USER,
-      pass: process.env.BREVO_SMTP_KEY,
-    },
-    connectionTimeout: 15000,
-  });
-} else if (useSendGrid) {
-  // SendGrid
-  transporter = nodemailer.createTransport({
-    host: "smtp.sendgrid.net",
-    port: 587,
-    secure: false,
-    auth: {
-      user: "apikey",
-      pass: process.env.SENDGRID_API_KEY,
-    },
-    connectionTimeout: 15000,
-  });
-} else {
-  // Gmail (works locally, may fail on cloud platforms due to SMTP blocking)
-  transporter = nodemailer.createTransport({
-    service: "gmail",
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    requireTLS: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-    tls: {
-      rejectUnauthorized: false,
-    },
-    connectionTimeout: 15000,
-  });
+try {
+  if (useBrevo) {
+    // Brevo (formerly Sendinblue) - 300 emails/day FREE forever
+    console.log("📧 Using Brevo SMTP for emails");
+    transporter = nodemailer.createTransport({
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.BREVO_SMTP_USER || process.env.EMAIL_USER,
+        pass: process.env.BREVO_SMTP_KEY,
+      },
+      connectionTimeout: 15000,
+    });
+  } else if (useSendGrid) {
+    // SendGrid
+    console.log("📧 Using SendGrid SMTP for emails");
+    transporter = nodemailer.createTransport({
+      host: "smtp.sendgrid.net",
+      port: 587,
+      secure: false,
+      auth: {
+        user: "apikey",
+        pass: process.env.SENDGRID_API_KEY,
+      },
+      connectionTimeout: 15000,
+    });
+  } else {
+    // Gmail (works locally, may fail on cloud platforms due to SMTP blocking)
+    console.log("📧 Using Gmail SMTP for emails (may not work on some cloud platforms)");
+    transporter = nodemailer.createTransport({
+      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+      connectionTimeout: 15000,
+    });
+  }
+} catch (error) {
+  console.error("❌ Failed to initialize email transporter:", error.message);
+  transporter = null;
 }
 
 // Generate 6-digit OTP
@@ -56,6 +64,12 @@ const generateOTP = () => {
 
 // Send OTP email
 const sendOTPEmail = async (email, otp) => {
+  // Validate transporter exists
+  if (!transporter) {
+    console.error("❌ Email transporter not initialized");
+    throw new Error("Email service not configured properly");
+  }
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
@@ -77,7 +91,7 @@ const sendOTPEmail = async (email, otp) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    const result = await transporter.sendMail(mailOptions);
     console.log(`✅ OTP email sent successfully to ${email}`);
     return true;
   } catch (error) {
@@ -86,7 +100,9 @@ const sendOTPEmail = async (email, otp) => {
       useBrevo: !!process.env.BREVO_SMTP_KEY,
       useSendGrid: !!process.env.SENDGRID_API_KEY,
       useGmail: !process.env.BREVO_SMTP_KEY && !process.env.SENDGRID_API_KEY,
+      hasEmailUser: !!process.env.EMAIL_USER,
     });
+    // Don't crash the server, throw a user-friendly error
     throw new Error("Failed to send OTP email: " + error.message);
   }
 };
